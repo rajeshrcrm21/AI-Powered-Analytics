@@ -1,0 +1,15 @@
+# Credentials — never commit
+.env
+.env.*
+!.env.example
+
+# Metabase CLI scratch/working files
+.scratch/
+.mb/
+
+# OS / editor cruft
+.DS_Store
+*.log
+
+# Local Claude Code settings
+.claude/settings.local.json
