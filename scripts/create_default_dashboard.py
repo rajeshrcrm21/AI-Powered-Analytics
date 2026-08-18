@@ -21,8 +21,8 @@ Every card this script creates lives in a "Default Dashboard Charts"
 sub-collection under the account's own collection (see
 resolve_charts_collection) - the dashboard itself sits directly in the
 account collection, one level up. This keeps default-dashboard charts
-visually separate from anything the Chart Suggestions flow creates directly
-in the account collection.
+visually separate from anything the Recommendation Engine or Transcript to
+Insights flows create directly in the account collection.
 
 Usage:
     python3 scripts/create_default_dashboard.py --profile <mb-profile> [--account <number>]

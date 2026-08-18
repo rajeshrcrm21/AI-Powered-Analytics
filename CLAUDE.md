@@ -60,16 +60,19 @@ status`) directly in the main conversation. If it fails, stop and tell the
 user exactly what to fix. Do not proceed to Step 0.5 on broken config.
 
 **Step 0.5 — Ask which kind of work to do.**
-Once configuration is verified, ask via `AskUserQuestion` (exactly 2 discrete
+Once configuration is verified, ask via `AskUserQuestion` (exactly 3 discrete
 options — this is what that tool is for, unlike Step 2's entity list below):
 
-- **Chart Suggestions** — the full insight-discovery workflow: proceed to
-  Step 1 below.
+- **Recommendation Engine** — the full insight-discovery workflow: proceed
+  to Step 1 below.
 - **Default Dashboard** — the standardized onboarding dashboard every
   Advanced Analytics client gets, automated end-to-end: skip straight to
   "Default Dashboard flow" below (no entity choice, no recommendation count —
   it's the same fixed set of charts for every account, adapted to that
   account's actual data).
+- **Transcript to Insights** — turn a client meeting transcript into chart
+  recommendations grounded in that account's real data: skip straight to
+  "Transcript to Insights flow" below.
 
 ### Default Dashboard flow
 
@@ -90,7 +93,35 @@ options — this is what that tool is for, unlike Step 2's entity list below):
    already exists), relay that plainly — don't retry with guesses or force
    anything.
 
-### Chart Suggestions flow
+### Transcript to Insights flow
+
+Turns a client meeting transcript (call recording / notetaker output) into
+chart recommendations grounded in that account's real data. Follow
+`prompts/transcript-insights.md` for the full method — summary:
+
+1. Ask exactly: "Which Recruit CRM account is this transcript for? Please
+   provide the account number."
+2. Ask exactly: "Please paste the full transcript." Wait for it — accept
+   whatever length/format it comes in (raw call recording transcript or
+   notetaker output), don't ask the user to reformat it first.
+3. Extract the analytics requirements actually expressed in the transcript,
+   then ground each one in this account's real discovered data (same
+   discovery step as the Recommendation Engine flow, `prompts/discovery.md`)
+   — never invent a chart for a requirement the account's data can't
+   actually support; say so explicitly instead (see
+   `prompts/transcript-insights.md`'s data-quality handling).
+4. Present the resulting charts as a **numbered list** (per
+   `prompts/transcript-insights.md`'s format), citing what in the transcript
+   drove each one.
+5. Ask which recommendation(s) to actually create (same confirm-before-create
+   gate as `prompts/chart-generation.md` — "create all" creates every one
+   presented). Create confirmed charts under "Data Team WIP" using the same
+   account-collection convention as the Recommendation Engine flow (see
+   "Where created charts live") — individual cards only, **not** a dashboard.
+   Dashboard assembly for this flow is future scope, not built yet.
+6. Log per "History log" below.
+
+### Recommendation Engine flow
 
 **Step 1 — Ask for the account.**
 Ask exactly: "Which Recruit CRM account would you like to analyze? Please
@@ -307,10 +338,12 @@ inside a sub-collection named for the account number being analyzed.
    `mb collection create --body '{"name":"<account_number>","parent_id":199}'`.
 4. Never create a card outside this account-scoped collection.
 
-This is the Chart Suggestions flow's convention. The Default Dashboard flow
-instead nests its cards one level deeper, in a "Default Dashboard Charts"
-sub-collection under the account's collection (see "Default Dashboard flow"
-above and `scripts/create_default_dashboard.py`) — its dashboard still sits
+This is the Recommendation Engine flow's convention — the Transcript to
+Insights flow uses the same convention (individual cards directly in the
+account's collection). The Default Dashboard flow instead nests its cards
+one level deeper, in a "Default Dashboard Charts" sub-collection under the
+account's collection (see "Default Dashboard flow" above and
+`scripts/create_default_dashboard.py`) — its dashboard still sits
 directly in the account's collection.
 
 ## History log
@@ -330,7 +363,8 @@ self-contained JSON line; don't rewrite existing lines).
 Append an entry at these points:
 
 - **After presenting recommendations** (end of `prompts/recommendation.md`'s
-  Step 4): one `recommendations_presented` entry.
+  Step 4, or `prompts/transcript-insights.md`'s output step): one
+  `recommendations_presented` entry.
   ```json
   {"timestamp": "2026-08-18T23:41:00Z", "type": "recommendations_presented", "account": "662", "entity_scope": "All", "count_requested": 5, "count_returned": 5, "recommendations": [{"rank": 1, "insight": "...", "chart_name": "...", "chart_type": "bar"}]}
   ```
@@ -339,6 +373,10 @@ Append an entry at these points:
   ```json
   {"timestamp": "2026-08-18T23:45:00Z", "type": "chart_created", "account": "662", "recommendation_rank": 1, "card_id": 70801, "name": "...", "chart_type": "bar", "collection_id": 24521}
   ```
+  For entries from the Transcript to Insights flow, add `"source":
+  "transcript"` to both event types above (omit `source` — or use
+  `"source": "insight_discovery"` — for the Recommendation Engine flow) so
+  the two are distinguishable in `logs/history.jsonl`.
 - **After a Default Dashboard run** (`scripts/create_default_dashboard.py`
   appends this itself — see the script): one `default_dashboard_created` (or
   `_skipped` / `_failed`) entry.
