@@ -1,0 +1,38 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "input=$(cat); cmd=$(printf '%s' \"$input\" | jq -r '.tool_input.command // empty'); mkdir -p .claude; if printf '%s' \"$cmd\" | grep -qE 'mb (card|dashboard) create' && ! printf '%s' \"$cmd\" | grep -qF -- '--help'; then if printf '%s' \"$input\" | grep -qF '\\\"id\\\":' && ! printf '%s' \"$input\" | grep -qF '\\\"ok\\\":false'; then c=$(cat .claude/.history-log-pending 2>/dev/null || echo 0); echo $((c+1)) > .claude/.history-log-pending; fi; elif printf '%s' \"$cmd\" | grep -qF 'logs/history.jsonl'; then echo 0 > .claude/.history-log-pending; fi",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "c=$(cat .claude/.history-log-pending 2>/dev/null || echo 0); if [ \"$c\" -gt 0 ] 2>/dev/null; then jq -n --arg c \"$c\" '{decision:\"block\", reason: (\"\\($c) card(s)/dashboard(s) were created via `mb card create` / `mb dashboard create` this session, but logs/history.jsonl has not been appended to since. Append the missing entry per CLAUDE.md \\\"History log\\\" before finishing (or run: echo 0 > .claude/.history-log-pending, if logging genuinely does not apply here).\")}'; else echo '{}'; fi",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "mkdir -p .claude; echo 0 > .claude/.history-log-pending",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -16,3 +16,6 @@ logs/
 
 # Local Claude Code settings
 .claude/settings.local.json
+
+# History-log-enforcement hook state (ephemeral per-session counter)
+.claude/.history-log-pending
