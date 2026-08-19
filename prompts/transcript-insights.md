@@ -49,9 +49,7 @@ version is materially better or answers something genuinely different.
 ## Output format — numbered list
 
 Present every requirement that resolved to a real, buildable chart as a
-numbered list, in the order they came up in the transcript. Reuse
-`prompts/recommendation.md`'s per-item structure, with one addition at the
-top of each item:
+numbered list, in the order they came up in the transcript:
 
 ```
 ### Chart #<n>
@@ -59,44 +57,61 @@ top of each item:
 **Client's Ask**
 <what the client actually said or asked for, quoted or closely paraphrased>
 
-**Insight**
-<what this chart will actually show, grounded in the real data>
-
 **Recommended Chart**
 <chart title>
 
 **Chart Type**
 <bar / line / funnel / stacked bar / scatter / table / KPI / area / combo>
 
-**Business Question**
-<the question this chart answers>
-
 **Why This Chart**
-<why this visualization fits the data/insight>
-
-**Recommended Dimensions**
-<fields actually discovered>
+<why this visualization fits the data/ask>
 
 **Recommended Metrics**
 <fields/aggregations actually discovered>
 
-**Recommended Filters**
-<only filters that are genuinely useful>
+**Recommended Filters (If Any)**
+<only include this field at all if a filter is genuinely useful; omit it
+entirely otherwise>
 
-**Data Evidence**
-<the real pattern/numbers observed via mb query — never fabricated>
+**Follow-up questions I would actually ask**
+<see below — omit this field entirely if the ask has no real ambiguity>
 ```
+
+### Follow-up questions — what belongs here
+
+This is a concrete disambiguation, not an open-ended "any other requirements?"
+catch-all. Include it only when the client's ask can be correctly built more
+than one way and picking one silently would risk building the wrong thing.
+The bar: would a knowledgeable colleague actually need to ask this before
+building it, or are you just hedging?
+
+Example: the client says "we need the latest assignments." That's ambiguous
+in a way that changes the query — "latest" could mean the assignment
+*created* date or the *hiring stage* date, and those give different answers.
+The right follow-up is specific: "By 'latest,' do you mean by assignment
+created date or hiring stage date?" — not a vague "can you clarify what you
+mean?"
+
+Other examples of the same pattern: "top clients" (by revenue? by job
+count? by placements?), "recruiter performance" (placements? conversion
+rate? both?), "recent" anything (a specific window, or relative to today?).
+When the transcript doesn't settle it, name the actual fork and ask which
+side of it the client meant — don't guess and don't ask something generic.
 
 After the numbered list, call out separately (not numbered as a chart):
 - Any requirement that couldn't be built, and why.
-- Any requirement too vague to interpret, framed as a question back to the
-  user.
+- Any requirement too vague to draft a candidate chart for at all (distinct
+  from a chart that has a working draft but an open follow-up question —
+  that one still gets numbered above).
 
 ## Creating confirmed charts
 
 Same confirm-before-create gate as `prompts/chart-generation.md` — ask which
 of the numbered charts to actually create ("create all" creates every one
-presented). Build and verify each exactly per `prompts/chart-generation.md`.
+presented). Before creating a card that had open follow-up questions, ask
+them and get an answer first — don't build on the default/assumed
+interpretation without confirming it. Build and verify each exactly per
+`prompts/chart-generation.md`.
 
 Cards land under "Data Team WIP" using the same account-collection
 convention as the Recommendation Engine flow (CLAUDE.md "Where created
@@ -110,3 +125,6 @@ Log per CLAUDE.md "History log" — a `recommendations_presented` entry after
 presenting the numbered list, and one `chart_created` entry per card
 actually created. Add `"source": "transcript"` to both so they're
 distinguishable from Recommendation Engine entries in `logs/history.jsonl`.
+In the `recommendations` array, use `"client_ask"` in place of `"insight"`
+(this flow has no `insight` field) — otherwise the same shape as CLAUDE.md's
+example.
