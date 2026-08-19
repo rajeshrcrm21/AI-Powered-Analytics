@@ -31,26 +31,20 @@ with weak filler.
 ```
 ### Recommendation #<n>
 
-**Insight**
-<the actual finding from the customer's data>
-
 **Recommended Chart**
 <chart title>
 
 **Chart Type**
 <bar / line / funnel / stacked bar / scatter / table / KPI / area / combo>
 
+**Insight**
+<the actual finding from the customer's data>
+
 **Business Question**
 <the question this chart answers>
 
 **Why This Chart**
 <why this visualization fits the data/insight>
-
-**Why It Matters**
-<the business value/consequence>
-
-**Recommended Dimensions**
-<fields actually discovered>
 
 **Recommended Metrics**
 <fields/aggregations actually discovered>

@@ -289,10 +289,10 @@ question — say which of those applies.
 ## Presenting recommendations
 
 Use the exact structure in `prompts/recommendation.md` for every
-recommendation: Insight, Recommended Chart, Chart Type, Business Question,
-Why This Chart, Why It Matters, Recommended Dimensions, Recommended Metrics,
-Recommended Filters, Data Evidence. Data Evidence must cite the actual
-pattern observed — never fabricated numbers.
+recommendation: Recommended Chart, Chart Type, Insight, Business Question,
+Why This Chart, Recommended Metrics, Recommended Filters, Data Evidence.
+Data Evidence must cite the actual pattern observed — never fabricated
+numbers.
 
 ## Chart creation
 
