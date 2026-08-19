@@ -12,11 +12,13 @@ tables. Use `--dry-run` to validate before running. For anything not
 expressible in MBQL, fall back to native SQL (load the `native-sql` skill)
 using only fields confirmed to exist.
 
-**Before aggregating Deals, Assignments, Pitched Candidates, Notes, Tasks,
-Meetings, or Call Logs**, apply CLAUDE.md's duplicate-ID rules: use
-`COUNT(DISTINCT id)` for counts, not `COUNT(*)`, and remember Deal *value* is
-already split across duplicate rows (so `SUM()` is correct as-is for value,
-but not for counting deals). When a query needs a candidate's current/
+**Always use `COUNT(DISTINCT id)` for counts, on every entity, never
+`COUNT(*)`** — a defensive default per CLAUDE.md's duplicate-ID rules, not
+just something to remember for Deals, Assignments, Pitched Candidates, and
+Notes/Tasks/Meetings (the entities that actually have duplicate-id rows
+today). Remember Deal *value* is already split across duplicate-id rows (so
+`SUM()` is correct as-is for value, but not for counting deals — that still
+needs `COUNT(DISTINCT id)`). When a query needs a candidate's current/
 furthest pipeline stage, use the stage-ordinal `CASE` + `MAX(ordinal)`
 technique from CLAUDE.md rather than trusting stage-change timestamps, which
 are often only seconds apart.

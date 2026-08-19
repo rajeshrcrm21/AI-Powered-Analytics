@@ -397,29 +397,38 @@ the required minimum.
 These rules apply across **every** Recruit CRM account in this Metabase
 instance (not just one account) and are required for any correct query:
 
-**Duplicate IDs are expected in some tables, not a data quality bug:**
+**Duplicate IDs are expected in some tables, not a data quality bug — and
+"duplicate" here means duplicate `id` *values*, not duplicate records.** A
+row sharing an `id` with another row is not a repeat of the same data — it's
+a distinct row (a different stage, a different collaborator, a different
+association) that happens to share an `id` because the `id` is scoped to the
+underlying entity (a candidate-job pair, a deal, etc.), not to the row
+itself. The row *content* differs; only the `id` repeats.
 
 - Duplicate `id` values occur in: Deals, Assignments (the job↔candidate
-  pipeline table), Pitched Candidates, Notes, Tasks, Meetings, and sometimes
-  Call Logs.
-- No duplicate `id`s in: Candidates, Contacts, Jobs, Teams, Companies — these
-  are safe to `COUNT(*)`/`COUNT(id)` directly.
+  pipeline table), Pitched Candidates, and Notes/Tasks/Meetings.
+- No duplicate `id`s in: Candidates, Contacts, Jobs, Teams, Companies, and
+  Call Logs — these entities genuinely have one row per record.
+- **Always use `COUNT(DISTINCT id)` for any count, on every entity above —
+  including the ones with no known duplicates.** This is a defensive
+  default, not just a fix for the entities that currently have them: if a
+  data issue ever introduced a duplicate `id` on an entity that's never had
+  one before, a bare `COUNT(*)`/`COUNT(id)` would silently overcount and the
+  client would see a wrong number. `COUNT(DISTINCT id)` costs nothing when
+  there are no duplicates and protects against this case when there are.
 - **Assignments**: a new row is added for every stage change; the `id` is
   unique per *candidate-job pair*, not per row. `COUNT(*)` over this table
-  counts stage-history rows, not unique candidates — always
-  `COUNT(DISTINCT id)` (or dedupe first) when counting candidates/pipeline
-  entries.
-- **Deals**: duplicate rows exist to normalize collaborator names instead of
-  a comma-separated list. Deal *value* is already split across the
-  duplicate rows (e.g. a $100 deal with 3 collaborators might show as
-  30/30/40) — `SUM(deal_value)` across the duplicates gives the correct
-  total, but `COUNT(*)` overcounts the number of deals (use
-  `COUNT(DISTINCT id)`).
-- **Pitched Candidates**: a new row per status change — same
-  `COUNT(DISTINCT id)` rule applies.
-- **Notes / Tasks / Meetings / Call Logs**: a new row per association (e.g.
-  one note linked to multiple records can appear more than once) — dedupe
-  before counting.
+  counts stage-history rows, not unique candidates.
+- **Deals**: duplicate-id rows exist to normalize collaborator names instead
+  of a comma-separated list. Deal *value* is already split across those
+  rows (e.g. a $100 deal with 3 collaborators might show as 30/30/40) —
+  `SUM(deal_value)` across them gives the correct total, but counting deals
+  needs `COUNT(DISTINCT id)`, never `COUNT(*)`.
+- **Pitched Candidates**: a new row per status change — same pattern as
+  Assignments.
+- **Notes / Tasks / Meetings**: a new row per association (e.g. one note
+  linked to multiple records can appear more than once under the same
+  `id`) — dedupe before counting.
 
 **Determining a candidate's current/furthest pipeline stage:** timestamps
 between consecutive stage changes are often only seconds apart, so

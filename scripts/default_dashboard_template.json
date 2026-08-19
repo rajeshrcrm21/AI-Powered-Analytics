@@ -2128,17 +2128,24 @@
             "source-table": 48909,
             "aggregation": [
               [
-                "count",
+                "distinct",
                 {
                   "lib/uuid": "48e3a9b9-c1d9-485c-9b7f-a85d1ff143b3"
-                }
+                },
+                [
+                  "field",
+                  {},
+                  1870707
+                ]
               ]
             ]
           }
         ]
       },
       "visualization_settings": {},
-      "field_names": {},
+      "field_names": {
+        "1870707": "id"
+      },
       "param_mappings": [
         {
           "parameter_slug": "date",
@@ -2167,17 +2174,24 @@
             "source-table": 48736,
             "aggregation": [
               [
-                "count",
+                "distinct",
                 {
                   "lib/uuid": "3da0e3cf-a1e8-4fd1-be8a-522225cefbd5"
-                }
+                },
+                [
+                  "field",
+                  {},
+                  1874485
+                ]
               ]
             ]
           }
         ]
       },
       "visualization_settings": {},
-      "field_names": {},
+      "field_names": {
+        "1874485": "id"
+      },
       "param_mappings": [
         {
           "parameter_slug": "date",
@@ -2205,10 +2219,15 @@
             "source-table": 48909,
             "aggregation": [
               [
-                "count",
+                "distinct",
                 {
                   "lib/uuid": "a2e41b84-2ffb-4173-813d-2bb683e91477"
-                }
+                },
+                [
+                  "field",
+                  {},
+                  1870707
+                ]
               ]
             ],
             "lib/type": "mbql.stage/mbql",
@@ -2238,7 +2257,8 @@
         }
       },
       "field_names": {
-        "1870754": "created_on"
+        "1870754": "created_on",
+        "1870707": "id"
       },
       "param_mappings": [
         {
@@ -2267,10 +2287,15 @@
             "source-table": 48736,
             "aggregation": [
               [
-                "count",
+                "distinct",
                 {
                   "lib/uuid": "3976061c-9c71-4c85-844e-42629a1a422a"
-                }
+                },
+                [
+                  "field",
+                  {},
+                  1874485
+                ]
               ]
             ],
             "lib/type": "mbql.stage/mbql",
@@ -2300,7 +2325,8 @@
         }
       },
       "field_names": {
-        "1874514": "created_on"
+        "1874514": "created_on",
+        "1874485": "id"
       },
       "param_mappings": [
         {
@@ -2328,10 +2354,15 @@
           {
             "aggregation": [
               [
-                "count",
+                "distinct",
                 {
                   "lib/uuid": "58f861a4-5c82-41f5-99dd-0411ba4664ac"
-                }
+                },
+                [
+                  "field",
+                  {},
+                  1870707
+                ]
               ]
             ],
             "breakout": [
@@ -2377,7 +2408,8 @@
         "graph.metrics": []
       },
       "field_names": {
-        "1870740": "source"
+        "1870740": "source",
+        "1870707": "id"
       },
       "param_mappings": [
         {
@@ -2406,10 +2438,15 @@
             "source-table": 48736,
             "aggregation": [
               [
-                "count",
+                "distinct",
                 {
                   "lib/uuid": "ad5b96dc-4dbc-4f00-8b01-b42dc4b72359"
-                }
+                },
+                [
+                  "field",
+                  {},
+                  1874485
+                ]
               ]
             ],
             "lib/type": "mbql.stage/mbql",
@@ -2439,7 +2476,8 @@
         "graph.metrics": []
       },
       "field_names": {
-        "1874501": "stage"
+        "1874501": "stage",
+        "1874485": "id"
       },
       "param_mappings": [
         {

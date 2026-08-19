@@ -82,20 +82,23 @@ CLAUDE.md "Avoiding duplicate charts").
 ## 5b. Check for duplicate-ID tables
 
 Per CLAUDE.md's "Recruit CRM / Metabase data model" section, Deals,
-Assignments, Pitched Candidates, Notes, Tasks, Meetings, and sometimes Call
-Logs legitimately contain repeated `id` values by design (one row per stage/
-status/association change) — Candidates, Contacts, Jobs, Teams, and
-Companies do not. Confirm this holds for the tables in play here with a
-quick check:
+Assignments, Pitched Candidates, and Notes/Tasks/Meetings legitimately
+contain repeated `id` *values* by design (one row per stage/status/
+association change — the row content differs, only the `id` repeats) —
+Candidates, Contacts, Jobs, Teams, Companies, and Call Logs do not. Confirm
+this holds for the tables in play here with a quick check:
 
 ```sql
 SELECT COUNT(*) AS rows, COUNT(DISTINCT id) AS distinct_ids FROM <table>
 ```
 
-If `rows > distinct_ids` on one of the expected tables, that's normal —
-carry `COUNT(DISTINCT id)` forward into analysis, not `COUNT(*)`. If it
-happens on a table expected to have unique ids, treat that as a real data
-quality flag instead.
+If `rows > distinct_ids` on one of the expected tables, that's normal. But
+regardless of what this check shows — **always carry `COUNT(DISTINCT id)`
+forward into analysis, on every entity, never `COUNT(*)`.** That's a
+defensive default per CLAUDE.md, not conditional on this table actually
+having duplicates today. If `rows > distinct_ids` shows up on a table
+expected to have unique ids, treat that as a real data quality flag to
+raise, separate from (not instead of) using `COUNT(DISTINCT id)`.
 
 ## 6. Summarize before moving on
 
