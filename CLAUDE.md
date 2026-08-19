@@ -309,8 +309,9 @@ Only after recommendations are presented and explained:
 1. Ask the user to confirm which recommendation(s) to actually create in
    Metabase (don't assume "all of them" unless they say so).
 2. Follow `prompts/chart-generation.md` — build the query from fields that
-   were actually discovered, validate it (`mb query --dry-run` / equivalent),
-   then `mb card create`.
+   were actually discovered, validate it (`mb query --dry-run`, plus an
+   actual live run for native SQL — see chart-generation.md's validation
+   step, which native SQL cannot skip), then `mb card create`.
 3. Verify the created card with `mb card get <id>` and report back its id,
    name, and a link/reference the user can open in Metabase.
 4. If a chart can't be created because a required field/table isn't

@@ -18,8 +18,21 @@ using only fields that were actually discovered — never assumed schema.
      functions, or other computations the GUI builder can't represent). If
      you fall back to SQL, state explicitly why MBQL wasn't sufficient.
    - Use only tables/fields confirmed to exist during discovery.
-   - Validate before creating: `mb query --dry-run` (MBQL) or a scratch
-     `mb query`/native run to sanity-check row shape and values.
+   - **Validate before creating — native SQL needs *more* rigor than MBQL,
+     not less**, since it bypasses the query builder's structural guardrails
+     entirely (no typo-checked column/table refs, no join validation) and is
+     exactly the path used for the more error-prone queries (stage-ordinal
+     `CASE` ranking, window functions):
+     1. `mb query --dry-run` first, always, for every query — MBQL or
+        native SQL. This pre-flight-validates the query envelope (shape,
+        template tags, parameter refs) for both.
+     2. For native SQL specifically, a clean dry-run is **not enough on its
+        own** — it cannot check the SQL text itself. Follow it with an
+        actual `mb query --file ... --json` run (no `--dry-run`) against
+        the real warehouse, and confirm it genuinely succeeded (no error,
+        a sane column count and row shape for what the chart needs) before
+        creating the card. Never create a native-SQL card off a dry-run
+        alone.
 4. Choose the visualization (load the `visualization` skill for `display`
    and `visualization_settings` conventions):
    - Match chart type to the insight and data shape (see `Chart Type` chosen
