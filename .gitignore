@@ -7,6 +7,9 @@
 .scratch/
 .mb/
 
+# Local-only workflow history - never shared/mixed across teammates
+logs/
+
 # OS / editor cruft
 .DS_Store
 *.log

@@ -348,13 +348,15 @@ directly in the account's collection.
 
 ## History log
 
-Every workflow in this project appends to a single project-tracked history
-log at `logs/history.jsonl` — one JSON object per line, newline-delimited,
-append-only. This is the project's own audit trail (which accounts were
+Every workflow in this project appends to a local history log at
+`logs/history.jsonl` — one JSON object per line, newline-delimited,
+append-only. This is a **local-only** audit trail (which accounts were
 analyzed, what was recommended, what was actually created and when) — it is
-local project data, not Metabase content, so it isn't subject to hard
-constraint 7, but the same "never fabricate" rule applies: only log what
-actually happened, with real ids/timestamps.
+git-ignored on purpose: each teammate's log stays on their own machine and
+is never pushed/shared/merged with anyone else's. It's local project data,
+not Metabase content, so it isn't subject to hard constraint 7, but the same
+"never fabricate" rule applies: only log what actually happened, with real
+ids/timestamps.
 
 Get the timestamp with `date -u +"%Y-%m-%dT%H:%M:%SZ"` (real wall-clock
 time) — never invent one. Append with a simple `>>` (each event is one
