@@ -60,22 +60,39 @@ Open this folder in VS Code with Claude Code active, and say any of:
 Claude will then:
 
 1. Verify Metabase CLI configuration.
-2. Ask which Recruit CRM account (account number) to analyze.
-3. Ask which entity you want chart recommendations for — a plain-text
+2. Ask which kind of work you want: **Recommendation Engine** (full
+   insight-discovery), **Default Dashboard** (the standardized onboarding
+   dashboard every account gets, built automatically), or **Transcript to
+   Insights** (turn a pasted client meeting transcript into chart
+   recommendations grounded in that account's real data).
+
+For the **Recommendation Engine** flow, Claude then:
+
+3. Asks which Recruit CRM account (account number) to analyze.
+4. Asks which entity you want chart recommendations for — a plain-text
    numbered list built from the entities actually discovered for that
    account, with "All" first and "Do you have anything in mind?" (free-text)
    last.
-4. Ask how many chart recommendations you want.
-5. Discover the account's actual data through `mb` (databases, tables,
+5. Asks how many chart recommendations you want.
+6. Discovers the account's actual data through `mb` (databases, tables,
    fields, existing charts), scoped to your chosen entity/focus.
-6. Analyze it for meaningful, trustworthy business insights.
-7. Present the requested number of ranked recommendations, each with: what it
-   shows, why it's useful, what question it answers, what triggered it, and
-   what to investigate.
-8. On your confirmation, create the chosen chart(s) in Metabase via `mb card
-   create`, verify them, and hand you back the card reference.
+7. Analyzes it for meaningful, trustworthy business insights.
+8. Presents the requested number of ranked recommendations, each with: what
+   it shows, why it's useful, what question it answers, what triggered it,
+   and what to investigate.
+9. On your confirmation, creates the chosen chart(s) in Metabase via `mb
+   card create`, verifies them, and hands you back the card reference.
 
-See `docs/workflow.md` for the same flow written out in more detail, and
+The **Default Dashboard** flow instead just asks for the account number and
+runs `scripts/create_default_dashboard.py`, which discovers the account's
+data and builds the standard chart set end-to-end.
+
+The **Transcript to Insights** flow asks for the account number and the
+pasted transcript, extracts analytics requirements from it, grounds each in
+the account's real data, and presents a numbered list of buildable charts
+before asking which to create.
+
+See `docs/workflow.md` for all three flows written out in more detail, and
 `CLAUDE.md` for the operating instructions Claude itself follows.
 
 ## Project structure
@@ -87,15 +104,20 @@ README.md                  This file
 .gitignore
 config/analysis-config.md  Tunable defaults (ranking weights, thresholds)
 prompts/
-  discovery.md              Stage 1: map the account's actual data
-  analysis.md                Stage 2: find real insights, apply data-quality gate
-  recommendation.md          Stage 3: rank + format recommendations
-  chart-generation.md        Stage 4: create + verify charts in Metabase
+  discovery.md              Recommendation Engine: map the account's actual data
+  analysis.md                Recommendation Engine: find real insights, data-quality gate
+  recommendation.md          Recommendation Engine: rank + format recommendations
+  chart-generation.md        Recommendation Engine: create + verify charts in Metabase
+  transcript-insights.md     Transcript to Insights: transcript -> grounded chart candidates
 docs/
   architecture.md            System shape and rationale
-  workflow.md                Human-readable walkthrough
+  workflow.md                Human-readable walkthrough of all three flows
 scripts/
-  mb-login.sh                 One-time helper: .env -> mb auth login
+  mb-login.sh                          One-time helper: .env -> mb auth login
+  create_default_dashboard.py          Automates the Default Dashboard flow end-to-end
+  default_dashboard_template.json      Fixed chart set the Default Dashboard flow replicates
+logs/
+  history.jsonl              Local-only, git-ignored audit trail (see CLAUDE.md "History log")
 ```
 
 ## Security
@@ -135,8 +157,12 @@ Claude will only invoke one if the task genuinely calls for it:
 
 ## Limitations / what's not built here
 
-- No dashboards or web pages — recommendations and explanations are
-  delivered as terminal/chat output.
+- No web pages of this project's own — recommendations and explanations are
+  delivered as terminal/chat output; the only dashboard/card content that
+  exists is what gets created in Metabase itself (Default Dashboard flow,
+  or confirmed Recommendation Engine / Transcript to Insights charts).
+- Transcript to Insights creates individual cards only — dashboard assembly
+  for that flow is future scope, not built yet.
 - Chart creation depends on what the installed `mb` CLI version actually
   supports; if a capability isn't available, Claude will say so rather than
   working around it with a different interface.
