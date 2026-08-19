@@ -28,7 +28,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "mkdir -p .claude; echo 0 > .claude/.history-log-pending",
+            "command": "mkdir -p .claude logs; echo 0 > .claude/.history-log-pending",
             "timeout": 10
           }
         ]
