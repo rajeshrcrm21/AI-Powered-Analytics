@@ -60,7 +60,7 @@ status`) directly in the main conversation. If it fails, stop and tell the
 user exactly what to fix. Do not proceed to Step 0.5 on broken config.
 
 **Step 0.5 — Ask which kind of work to do.**
-Once configuration is verified, ask via `AskUserQuestion` (exactly 3 discrete
+Once configuration is verified, ask via `AskUserQuestion` (exactly 4 discrete
 options — this is what that tool is for, unlike Step 2's entity list below):
 
 - **Recommendation Engine** — the full insight-discovery workflow: proceed
@@ -70,6 +70,12 @@ options — this is what that tool is for, unlike Step 2's entity list below):
   "Default Dashboard flow" below (no entity choice, no recommendation count —
   it's the same fixed set of charts for every account, adapted to that
   account's actual data).
+- **Important Metrics Dashboard** — the standardized hiring-efficiency
+  dashboard (jobs, ratios, trends, candidate diversity) every Advanced
+  Analytics client gets, automated end-to-end: skip straight to "Important
+  Metrics Dashboard flow" below (no entity choice, no recommendation count —
+  same fixed set of charts for every account, adapted to that account's
+  actual data).
 - **Transcript to Insights** — turn a client meeting transcript into chart
   recommendations grounded in that account's real data: skip straight to
   "Transcript to Insights flow" below.
@@ -89,6 +95,25 @@ options — this is what that tool is for, unlike Step 2's entity list below):
    `scripts/create_default_dashboard.py`'s docstring for what it does and
    its own guardrails: Starrocks-only, additive-only per hard constraint 7,
    history logging).
+4. If the script fails or reports a skip (e.g. account not found, dashboard
+   already exists), relay that plainly — don't retry with guesses or force
+   anything.
+
+### Important Metrics Dashboard flow
+
+1. Ask exactly: "Which Recruit CRM account would you like to build the
+   important metrics dashboard for? Please provide the account number."
+2. Run `python3 scripts/create_important_metrics_dashboard.py --profile
+   <name> --account <account_number>` (the profile confirmed in Step 0)
+   directly in the main conversation — this is a single Bash invocation, not
+   a subagent/fork; the script's own progress output is fine to show as-is.
+3. Report back what the script reports: dashboard id/link, cards created vs.
+   skipped (and why), and the collections it landed in — the dashboard
+   directly in the account's collection, its cards in a nested "Important
+   Metrics Dashboard Charts" sub-collection (see
+   `scripts/create_important_metrics_dashboard.py`'s docstring for what it
+   does and its own guardrails: Starrocks-only, additive-only per hard
+   constraint 7, history logging).
 4. If the script fails or reports a skip (e.g. account not found, dashboard
    already exists), relay that plainly — don't retry with guesses or force
    anything.
@@ -341,11 +366,13 @@ inside a sub-collection named for the account number being analyzed.
 
 This is the Recommendation Engine flow's convention — the Transcript to
 Insights flow uses the same convention (individual cards directly in the
-account's collection). The Default Dashboard flow instead nests its cards
-one level deeper, in a "Default Dashboard Charts" sub-collection under the
-account's collection (see "Default Dashboard flow" above and
-`scripts/create_default_dashboard.py`) — its dashboard still sits
-directly in the account's collection.
+account's collection). The Default Dashboard and Important Metrics
+Dashboard flows instead nest their cards one level deeper, each in their own
+sub-collection under the account's collection — "Default Dashboard Charts"
+(see "Default Dashboard flow" above and `scripts/create_default_dashboard.py`)
+or "Important Metrics Dashboard Charts" (see "Important Metrics Dashboard
+flow" above and `scripts/create_important_metrics_dashboard.py`) — each
+flow's dashboard still sits directly in the account's collection.
 
 ## History log
 
@@ -385,6 +412,13 @@ Append an entry at these points:
   `_skipped` / `_failed`) entry.
   ```json
   {"timestamp": "2026-08-18T23:50:00Z", "type": "default_dashboard_created", "account": "662", "dashboard_id": 19175, "collection_id": 24521, "charts_collection_id": 24600, "cards_created": 31, "cards_skipped": [], "profile": "recruitcrm"}
+  ```
+- **After an Important Metrics Dashboard run**
+  (`scripts/create_important_metrics_dashboard.py` appends this itself — see
+  the script): one `important_metrics_dashboard_created` (or `_skipped` /
+  `_failed`) entry.
+  ```json
+  {"timestamp": "2026-08-18T23:55:00Z", "type": "important_metrics_dashboard_created", "account": "662", "dashboard_id": 19180, "collection_id": 24521, "charts_collection_id": 24610, "cards_created": 18, "cards_skipped": [], "profile": "recruitcrm"}
   ```
 
 Any other genuinely useful event (e.g. an account that couldn't be located,

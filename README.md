@@ -62,9 +62,11 @@ Claude will then:
 1. Verify Metabase CLI configuration.
 2. Ask which kind of work you want: **Recommendation Engine** (full
    insight-discovery), **Default Dashboard** (the standardized onboarding
-   dashboard every account gets, built automatically), or **Transcript to
-   Insights** (turn a pasted client meeting transcript into chart
-   recommendations grounded in that account's real data).
+   dashboard every account gets, built automatically), **Important Metrics
+   Dashboard** (the standardized hiring-efficiency dashboard every account
+   gets, also built automatically), or **Transcript to Insights** (turn a
+   pasted client meeting transcript into chart recommendations grounded in
+   that account's real data).
 
 For the **Recommendation Engine** flow, Claude then:
 
@@ -87,12 +89,17 @@ The **Default Dashboard** flow instead just asks for the account number and
 runs `scripts/create_default_dashboard.py`, which discovers the account's
 data and builds the standard chart set end-to-end.
 
+The **Important Metrics Dashboard** flow works the same way: asks for the
+account number and runs `scripts/create_important_metrics_dashboard.py`,
+which discovers the account's data and builds its own standard chart set
+(jobs & hiring efficiency, ratios, trends, candidate diversity) end-to-end.
+
 The **Transcript to Insights** flow asks for the account number and the
 pasted transcript, extracts analytics requirements from it, grounds each in
 the account's real data, and presents a numbered list of buildable charts
 before asking which to create.
 
-See `docs/workflow.md` for all three flows written out in more detail, and
+See `docs/workflow.md` for all four flows written out in more detail, and
 `CLAUDE.md` for the operating instructions Claude itself follows.
 
 ## Project structure
@@ -111,11 +118,13 @@ prompts/
   transcript-insights.md     Transcript to Insights: transcript -> grounded chart candidates
 docs/
   architecture.md            System shape and rationale
-  workflow.md                Human-readable walkthrough of all three flows
+  workflow.md                Human-readable walkthrough of all four flows
 scripts/
-  mb-login.sh                          One-time helper: .env -> mb auth login
-  create_default_dashboard.py          Automates the Default Dashboard flow end-to-end
-  default_dashboard_template.json      Fixed chart set the Default Dashboard flow replicates
+  mb-login.sh                                    One-time helper: .env -> mb auth login
+  create_default_dashboard.py                    Automates the Default Dashboard flow end-to-end
+  default_dashboard_template.json                Fixed chart set the Default Dashboard flow replicates
+  create_important_metrics_dashboard.py          Automates the Important Metrics Dashboard flow end-to-end
+  important_metrics_dashboard_template.json      Fixed chart set the Important Metrics Dashboard flow replicates
 logs/
   history.jsonl              Local-only, git-ignored audit trail (see CLAUDE.md "History log")
 ```
@@ -160,7 +169,8 @@ Claude will only invoke one if the task genuinely calls for it:
 - No web pages of this project's own — recommendations and explanations are
   delivered as terminal/chat output; the only dashboard/card content that
   exists is what gets created in Metabase itself (Default Dashboard flow,
-  or confirmed Recommendation Engine / Transcript to Insights charts).
+  Important Metrics Dashboard flow, or confirmed Recommendation Engine /
+  Transcript to Insights charts).
 - Transcript to Insights creates individual cards only — dashboard assembly
   for that flow is future scope, not built yet.
 - Chart creation depends on what the installed `mb` CLI version actually

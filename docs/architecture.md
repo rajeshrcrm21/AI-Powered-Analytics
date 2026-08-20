@@ -13,7 +13,7 @@ mb auth list / status        (verify Metabase CLI config)
   |
   v
 Ask which kind of work: Recommendation Engine / Default Dashboard /
-                         Transcript to Insights
+                         Important Metrics Dashboard / Transcript to Insights
   |
   +-- Recommendation Engine -----------------------------------------+
   |     Ask account -> ask entity/focus scope -> ask rec. count      |
@@ -48,6 +48,22 @@ Ask which kind of work: Recommendation Engine / Default Dashboard /
   |        stops rather than touching an existing default dashboard)   |
   +--------------------------------------------------------------------+
   |
+  +-- Important Metrics Dashboard ---------------------------------------+
+  |     Ask account number                                               |
+  |       |                                                               |
+  |       v                                                               |
+  |     scripts/create_important_metrics_dashboard.py                    |
+  |       --profile <p> --account <n>                                    |
+  |       (discovers the account's tables via mb, builds the same        |
+  |        fixed set of hiring-efficiency/ratio/trend/diversity charts   |
+  |        every account gets, remapping fields/tables per entity for    |
+  |        cards that span more than one - e.g. jobs<->assignments       |
+  |        joins - skips any chart whose entity doesn't exist for this   |
+  |        account, dry-run validates every query before creating it -   |
+  |        additive-only, stops rather than touching an existing         |
+  |        important metrics dashboard)                                  |
+  +--------------------------------------------------------------------+
+  |
   +-- Transcript to Insights -------------------------------------------+
         Ask account number -> ask for the pasted transcript
           |
@@ -77,8 +93,9 @@ A `.claude/settings.json` hook enforces the history-log step for the two
 flows that create cards/dashboards directly in the conversation: it flags
 (via a `Stop` hook) if `mb card create` / `mb dashboard create` ran but
 `logs/history.jsonl` was never appended to before the session ends. The
-Default Dashboard script logs itself in code instead (see
-`scripts/create_default_dashboard.py`).
+Default Dashboard and Important Metrics Dashboard scripts log themselves in
+code instead (see `scripts/create_default_dashboard.py` and
+`scripts/create_important_metrics_dashboard.py`).
 
 ## What does not exist here
 
@@ -86,7 +103,8 @@ Default Dashboard script logs itself in code instead (see
 - No database is created or connected to directly by this project.
 - No browser automation.
 - The only "runtime" is this conversation plus the `mb` CLI subprocess calls
-  Claude (or `scripts/create_default_dashboard.py`) makes on the user's
+  Claude (or `scripts/create_default_dashboard.py` /
+  `scripts/create_important_metrics_dashboard.py`) makes on the user's
   behalf.
 
 ## Why Metabase CLI, not direct DB access
@@ -114,7 +132,7 @@ never `MAX(stage_date)`).
 ## Files
 
 - `CLAUDE.md` — persistent operating instructions (read first, every time),
-  including the three-flow branch, the data-model standing knowledge, and
+  including the four-flow branch, the data-model standing knowledge, and
   the history-log requirements
 - `prompts/` — the workflow-stage prompts referenced from CLAUDE.md:
   `discovery.md`, `analysis.md`, `recommendation.md`, `chart-generation.md`
@@ -129,6 +147,15 @@ never `MAX(stage_date)`).
   own docstring for the full behavior and guardrails
 - `scripts/default_dashboard_template.json` — the fixed set of charts the
   Default Dashboard flow replicates onto each account's own data
+- `scripts/create_important_metrics_dashboard.py` — automates the Important
+  Metrics Dashboard flow end-to-end (discovery, chart/dashboard creation,
+  logging); see its own docstring for the full behavior and guardrails,
+  including how it remaps fields/tables per entity for cards spanning more
+  than one, and its one native-SQL card (a window-function time-in-stage
+  calculation that MBQL can't express)
+- `scripts/important_metrics_dashboard_template.json` — the fixed set of
+  charts the Important Metrics Dashboard flow replicates onto each
+  account's own data
 - `logs/history.jsonl` — local-only, git-ignored audit trail of what was
   analyzed/recommended/created; enforced by hooks in `.claude/settings.json`
   for the Recommendation Engine and Transcript to Insights flows

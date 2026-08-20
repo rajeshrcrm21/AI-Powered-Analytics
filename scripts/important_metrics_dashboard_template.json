@@ -1,0 +1,2673 @@
+{
+  "source_dashboard_id": 12708,
+  "source_account_suffix": "8987",
+  "entity_table_prefix": {
+    "assignments": "assign_job_candidate",
+    "jobs": "jobs",
+    "candidates": "candidates"
+  },
+  "tabs": [
+    "Jobs & Hiring Efficiency",
+    "Ratio",
+    "Trends",
+    "Diversity"
+  ],
+  "dashboard_parameters": [
+    {
+      "slug": "date",
+      "name": "Date",
+      "type": "date/all-options",
+      "section_id": "date"
+    }
+  ],
+  "field_entity_map": {
+    "1866419": {
+      "entity": "assignments",
+      "column": "id"
+    },
+    "1866420": {
+      "entity": "assignments",
+      "column": "job_name"
+    },
+    "1866438": {
+      "entity": "assignments",
+      "column": "hiring_stage_date"
+    },
+    "1866441": {
+      "entity": "assignments",
+      "column": "job_owner_name"
+    },
+    "1866443": {
+      "entity": "assignments",
+      "column": "hiring_stage"
+    },
+    "1866445": {
+      "entity": "assignments",
+      "column": "created_on"
+    },
+    "1866454": {
+      "entity": "assignments",
+      "column": "job_created_on"
+    },
+    "1866456": {
+      "entity": "assignments",
+      "column": "join_for_jobs_table"
+    },
+    "1878075": {
+      "entity": "jobs",
+      "column": "id"
+    },
+    "1878076": {
+      "entity": "jobs",
+      "column": "job_name"
+    },
+    "1878095": {
+      "entity": "jobs",
+      "column": "job_status_label"
+    },
+    "1878098": {
+      "entity": "jobs",
+      "column": "owner_name"
+    },
+    "1878105": {
+      "entity": "jobs",
+      "column": "created_on"
+    },
+    "1870767": {
+      "entity": "candidates",
+      "column": "id"
+    },
+    "1870777": {
+      "entity": "candidates",
+      "column": "gender"
+    },
+    "1870779": {
+      "entity": "candidates",
+      "column": "city"
+    },
+    "1870791": {
+      "entity": "candidates",
+      "column": "work_exp_year"
+    },
+    "1870814": {
+      "entity": "candidates",
+      "column": "created_on"
+    }
+  },
+  "table_entity_map": {
+    "48517": "assignments",
+    "48929": "jobs",
+    "48691": "candidates"
+  },
+  "cards": [
+    {
+      "key": "avg_time_to_fill_per_job",
+      "source_card_id": 45709,
+      "tab": "Jobs & Hiring Efficiency",
+      "name": "Average Time To Fill Per Job",
+      "display": "table",
+      "entities": [
+        "assignments"
+      ],
+      "layout": {
+        "row": 0,
+        "col": 0,
+        "size_x": 24,
+        "size_y": 9
+      },
+      "dataset_query": {
+        "database": 13371569,
+        "lib/type": "mbql/query",
+        "stages": [
+          {
+            "lib/type": "mbql.stage/mbql",
+            "expressions": [
+              [
+                "datetime-diff",
+                {
+                  "lib/uuid": "d48e9eac-74e6-4bec-892e-6307dedadc3b",
+                  "lib/expression-name": "time till hiring stage"
+                },
+                [
+                  "field",
+                  {
+                    "effective-type": "type/DateTimeWithLocalTZ",
+                    "lib/uuid": "a44f9ade-579b-4b91-8c6f-2025e8e80f63",
+                    "base-type": "type/DateTimeWithLocalTZ"
+                  },
+                  1866454
+                ],
+                [
+                  "field",
+                  {
+                    "effective-type": "type/DateTimeWithLocalTZ",
+                    "lib/uuid": "8997e910-372c-4e87-8818-310ce140b218",
+                    "base-type": "type/DateTimeWithLocalTZ"
+                  },
+                  1866438
+                ],
+                "day"
+              ]
+            ],
+            "source-table": 48517,
+            "breakout": [
+              [
+                "field",
+                {
+                  "effective-type": "type/Text",
+                  "lib/uuid": "6f6b3663-86f5-4e5d-916e-d7527823552f",
+                  "base-type": "type/Text"
+                },
+                1866420
+              ]
+            ],
+            "aggregation": [
+              [
+                "ceil",
+                {
+                  "lib/uuid": "eeb5ba47-0b1c-4ab9-8fd7-937cb9eb24d9",
+                  "name": "Time To Get Placed",
+                  "display-name": "Time To Get Placed"
+                },
+                [
+                  "avg",
+                  {
+                    "lib/uuid": "394dec01-b997-4174-be54-de0f045bd2fd"
+                  },
+                  [
+                    "expression",
+                    {
+                      "lib/uuid": "914d6b77-a7af-4171-8138-1d12adefe822",
+                      "base-type": "type/Integer",
+                      "effective-type": "type/Integer"
+                    },
+                    "time till hiring stage"
+                  ]
+                ]
+              ]
+            ],
+            "filters": [
+              [
+                "=",
+                {
+                  "lib/uuid": "0befd3fb-039a-43c4-99b4-e2c699b2643a"
+                },
+                [
+                  "field",
+                  {
+                    "lib/uuid": "9d11b12e-fcfd-45c6-89b2-206c7d7d0cf3",
+                    "effective-type": "type/Text",
+                    "base-type": "type/Text"
+                  },
+                  1866443
+                ],
+                "Placed"
+              ],
+              [
+                "not-empty",
+                {
+                  "lib/uuid": "a72e7789-e6ef-4f64-9953-8136754c6b87"
+                },
+                [
+                  "field",
+                  {
+                    "effective-type": "type/Text",
+                    "lib/uuid": "7f3752ca-d21f-437f-821b-ed37db485839",
+                    "base-type": "type/Text"
+                  },
+                  1866420
+                ]
+              ]
+            ],
+            "order-by": [
+              [
+                "asc",
+                {
+                  "lib/uuid": "450d286a-bee7-4edc-8949-d18377259c61"
+                },
+                [
+                  "aggregation",
+                  {
+                    "effective-type": "type/Integer",
+                    "lib/uuid": "691743f8-9088-4088-84f5-80ca8136e1ea",
+                    "base-type": "type/Integer",
+                    "lib/source-name": "Time To Get Placed"
+                  },
+                  "eeb5ba47-0b1c-4ab9-8fd7-937cb9eb24d9"
+                ]
+              ]
+            ]
+          }
+        ]
+      },
+      "visualization_settings": {
+        "graph.x_axis.scale": "ordinal",
+        "graph.dimensions": [
+          "job_name"
+        ],
+        "table.pivot_column": "job_name",
+        "table.cell_column": "Time To Get Placed",
+        "column_settings": {
+          "[\"name\",\"Time To Get Placed\"]": {
+            "suffix": " day(s)"
+          }
+        },
+        "graph.metrics": [
+          "Time To Get Placed"
+        ]
+      },
+      "param_mapping": {
+        "kind": "field",
+        "entity": "assignments",
+        "column": "job_created_on",
+        "parameter_slug": "date",
+        "base_type": "type/DateTimeWithLocalTZ"
+      }
+    },
+    {
+      "key": "avg_time_to_fill_per_job_owner",
+      "source_card_id": 45711,
+      "tab": "Jobs & Hiring Efficiency",
+      "name": "Average Time To Fill Per Job Owner",
+      "display": "table",
+      "entities": [
+        "assignments"
+      ],
+      "layout": {
+        "row": 9,
+        "col": 0,
+        "size_x": 24,
+        "size_y": 6
+      },
+      "dataset_query": {
+        "database": 13371569,
+        "lib/type": "mbql/query",
+        "stages": [
+          {
+            "lib/type": "mbql.stage/mbql",
+            "expressions": [
+              [
+                "datetime-diff",
+                {
+                  "lib/uuid": "d48e9eac-74e6-4bec-892e-6307dedadc3b",
+                  "lib/expression-name": "time till hiring stage"
+                },
+                [
+                  "field",
+                  {
+                    "effective-type": "type/DateTimeWithLocalTZ",
+                    "lib/uuid": "a44f9ade-579b-4b91-8c6f-2025e8e80f63",
+                    "base-type": "type/DateTimeWithLocalTZ"
+                  },
+                  1866454
+                ],
+                [
+                  "field",
+                  {
+                    "effective-type": "type/DateTimeWithLocalTZ",
+                    "lib/uuid": "8997e910-372c-4e87-8818-310ce140b218",
+                    "base-type": "type/DateTimeWithLocalTZ"
+                  },
+                  1866438
+                ],
+                "day"
+              ]
+            ],
+            "source-table": 48517,
+            "breakout": [
+              [
+                "field",
+                {
+                  "lib/uuid": "16088386-0aae-4741-a711-9035969f79c4",
+                  "effective-type": "type/Text",
+                  "base-type": "type/Text"
+                },
+                1866441
+              ]
+            ],
+            "aggregation": [
+              [
+                "ceil",
+                {
+                  "lib/uuid": "eeb5ba47-0b1c-4ab9-8fd7-937cb9eb24d9",
+                  "name": "Time To Get Placed",
+                  "display-name": "Time To Get Placed"
+                },
+                [
+                  "avg",
+                  {
+                    "lib/uuid": "394dec01-b997-4174-be54-de0f045bd2fd"
+                  },
+                  [
+                    "expression",
+                    {
+                      "lib/uuid": "914d6b77-a7af-4171-8138-1d12adefe822",
+                      "base-type": "type/Integer",
+                      "effective-type": "type/Integer"
+                    },
+                    "time till hiring stage"
+                  ]
+                ]
+              ]
+            ],
+            "filters": [
+              [
+                "=",
+                {
+                  "lib/uuid": "0befd3fb-039a-43c4-99b4-e2c699b2643a"
+                },
+                [
+                  "field",
+                  {
+                    "lib/uuid": "9d11b12e-fcfd-45c6-89b2-206c7d7d0cf3",
+                    "effective-type": "type/Text",
+                    "base-type": "type/Text"
+                  },
+                  1866443
+                ],
+                "Placed"
+              ],
+              [
+                "not-empty",
+                {
+                  "lib/uuid": "74418690-f73e-431d-a2ff-c2e36372cf20",
+                  "effective-type": "type/Boolean"
+                },
+                [
+                  "field",
+                  {
+                    "lib/uuid": "40756746-2ebf-4eb6-91a6-33a4e3c0187d",
+                    "effective-type": "type/Text",
+                    "base-type": "type/Text"
+                  },
+                  1866441
+                ]
+              ]
+            ],
+            "order-by": [
+              [
+                "asc",
+                {
+                  "lib/uuid": "450d286a-bee7-4edc-8949-d18377259c61"
+                },
+                [
+                  "aggregation",
+                  {
+                    "effective-type": "type/Integer",
+                    "lib/uuid": "691743f8-9088-4088-84f5-80ca8136e1ea",
+                    "base-type": "type/Integer",
+                    "lib/source-name": "Time To Get Placed"
+                  },
+                  "eeb5ba47-0b1c-4ab9-8fd7-937cb9eb24d9"
+                ]
+              ]
+            ]
+          }
+        ]
+      },
+      "visualization_settings": {
+        "graph.x_axis.scale": "ordinal",
+        "graph.dimensions": [
+          "job_name"
+        ],
+        "table.pivot_column": "job_name",
+        "table.cell_column": "Time To Get Placed",
+        "column_settings": {
+          "[\"name\",\"Time To Get Placed\"]": {
+            "suffix": " day(s)"
+          }
+        },
+        "graph.metrics": [
+          "Time To Get Placed"
+        ]
+      },
+      "param_mapping": {
+        "kind": "field",
+        "entity": "assignments",
+        "column": "job_created_on",
+        "parameter_slug": "date",
+        "base_type": "type/DateTimeWithLocalTZ"
+      }
+    },
+    {
+      "key": "avg_time_spent_per_hiring_stage",
+      "source_card_id": 45710,
+      "tab": "Jobs & Hiring Efficiency",
+      "name": "Average Time Spent On Each Hiring Stage",
+      "display": "bar",
+      "entities": [
+        "assignments"
+      ],
+      "layout": {
+        "row": 15,
+        "col": 0,
+        "size_x": 24,
+        "size_y": 9
+      },
+      "dataset_query": {
+        "database": 13371569,
+        "lib/type": "mbql/query",
+        "stages": [
+          {
+            "native": "WITH setup AS (\nSELECT\n  `assign_job_candidate_8987`.`job_name` AS `job_name`,\n  `assign_job_candidate_8987`.`candidate_full_name` AS `candidate_full_name`,\n  `assign_job_candidate_8987`.`hiring_stage` AS `hiring_stage`,\n  `assign_job_candidate_8987`.`hiring_stage_date` AS `hiring stage date`,\n  LEAD(`assign_job_candidate_8987`.`hiring_stage_date`, 1) OVER (PARTITION BY `job_name`, `candidate_full_name` ORDER BY `hiring_stage_date` ASC) AS `next hiring stage date`,\n\n\t\t\tCASE \n    WHEN `hiring stage date` IS NOT NULL \n         AND `next hiring stage date` IS NOT NULL\n    THEN TIMESTAMPDIFF(\n            SECOND,\n            CAST(`assign_job_candidate_8987`.`updated_on` AS DATETIME),\n            LEAD(\n                CAST(`assign_job_candidate_8987`.`updated_on` AS DATETIME),\n                1\n            ) OVER (\n                PARTITION BY `job_name`, `candidate_full_name`\n                ORDER BY `updated_on` ASC\n            )\n         )\n    ELSE NULL\n  END AS `duration in current stage`\n  \nFROM\n  `assign_job_candidate_8987`\nWHERE {{job_name}} AND {{job_date}}\n)\n\nSELECT \n    `hiring_stage`,\n\t\n    coalesce(ceil(AVG(`duration in current stage`)/(60*60*24)), 0) AS `average time spent in this stage`\nFROM setup\nGROUP BY `hiring_stage`",
+            "lib/type": "mbql.stage/native",
+            "template-tags": [
+              {
+                "name": "job_name",
+                "widget-type": "string/=",
+                "type": "dimension",
+                "display-name": "Job Name",
+                "id": "12556463-1587-4c08-926d-aee0bfdbc60b",
+                "dimension": [
+                  "field",
+                  {
+                    "lib/uuid": "57d6ca3a-ac76-47c4-a1e0-276ef86009a6"
+                  },
+                  1866420
+                ]
+              },
+              {
+                "name": "job_date",
+                "widget-type": "date/month-year",
+                "display-name": "Job Date",
+                "id": "242ff7f1-01c7-41de-92c3-a5838596c127",
+                "type": "dimension",
+                "dimension": [
+                  "field",
+                  {
+                    "lib/uuid": "5cb4b60b-f625-450c-addb-f6f2a46c8698"
+                  },
+                  1866454
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "visualization_settings": {
+        "graph.show_values": true,
+        "graph.x_axis.scale": "ordinal",
+        "graph.dimensions": [
+          "hiring_stage"
+        ],
+        "graph.series_order_dimension": null,
+        "graph.series_order": null,
+        "column_settings": {
+          "[\"name\",\"average time spent in this stage\"]": {
+            "suffix": " day(s)"
+          }
+        },
+        "graph.metrics": [
+          "average time spent in this stage"
+        ]
+      },
+      "param_mapping": {
+        "kind": "template_tag",
+        "tag": "job_date",
+        "parameter_slug": "date"
+      },
+      "native_table_refs": [
+        {
+          "entity": "assignments",
+          "raw_table_name": "assign_job_candidate_8987"
+        }
+      ]
+    },
+    {
+      "key": "job_opening_duration",
+      "source_card_id": 45714,
+      "tab": "Jobs & Hiring Efficiency",
+      "name": "Job's Opening Duration",
+      "display": "table",
+      "entities": [
+        "jobs"
+      ],
+      "layout": {
+        "row": 24,
+        "col": 0,
+        "size_x": 24,
+        "size_y": 9
+      },
+      "dataset_query": {
+        "database": 13371569,
+        "lib/type": "mbql/query",
+        "stages": [
+          {
+            "lib/type": "mbql.stage/mbql",
+            "filters": [
+              [
+                "=",
+                {
+                  "lib/uuid": "67df63da-b4e5-4ad2-be63-74aafaca41f1"
+                },
+                [
+                  "field",
+                  {
+                    "effective-type": "type/Text",
+                    "lib/uuid": "8b5fc543-c95b-4e89-ad0c-0488fa6df3e5",
+                    "base-type": "type/Text"
+                  },
+                  1878095
+                ],
+                "Open"
+              ]
+            ],
+            "expressions": [
+              [
+                "datetime-diff",
+                {
+                  "lib/uuid": "eeb557d0-c0d1-48f4-a12b-33ff501351b7",
+                  "lib/expression-name": "Job Open Duration"
+                },
+                [
+                  "field",
+                  {
+                    "lib/uuid": "0d9a7d04-79a7-423d-a791-cc7eb340b241",
+                    "effective-type": "type/DateTimeWithLocalTZ",
+                    "base-type": "type/DateTimeWithLocalTZ"
+                  },
+                  1878105
+                ],
+                [
+                  "now",
+                  {
+                    "lib/uuid": "bf8e57be-64ff-48f8-ae02-5ff863bbd976"
+                  }
+                ],
+                "day"
+              ]
+            ],
+            "source-table": 48929,
+            "breakout": [
+              [
+                "field",
+                {
+                  "lib/uuid": "25b60b9f-9373-4449-b70d-6ed70faca7a2",
+                  "effective-type": "type/Text",
+                  "base-type": "type/Text"
+                },
+                1878076
+              ],
+              [
+                "expression",
+                {
+                  "base-type": "type/Integer",
+                  "lib/uuid": "6e52b963-5471-4128-8500-7fa666e79689",
+                  "effective-type": "type/Integer"
+                },
+                "Job Open Duration"
+              ]
+            ]
+          }
+        ]
+      },
+      "visualization_settings": {
+        "table.pivot_column": "job_name",
+        "table.cell_column": "Job Open Duration",
+        "column_settings": {
+          "[\"name\",\"Job Open Duration\"]": {
+            "suffix": " day(s)"
+          }
+        }
+      },
+      "param_mapping": {
+        "kind": "field",
+        "entity": "jobs",
+        "column": "created_on",
+        "parameter_slug": "date",
+        "base_type": "type/DateTimeWithLocalTZ"
+      }
+    },
+    {
+      "key": "jobs_breakdown_by_owner",
+      "source_card_id": 45712,
+      "tab": "Jobs & Hiring Efficiency",
+      "name": "Job's Breakdown By Owner",
+      "display": "table",
+      "entities": [
+        "jobs"
+      ],
+      "layout": {
+        "row": 33,
+        "col": 0,
+        "size_x": 24,
+        "size_y": 6
+      },
+      "dataset_query": {
+        "database": 13371569,
+        "lib/type": "mbql/query",
+        "stages": [
+          {
+            "breakout": [
+              [
+                "field",
+                {
+                  "lib/uuid": "2b1ae1e7-530e-47ab-9770-a24d743f7d78",
+                  "effective-type": "type/Text",
+                  "base-type": "type/Text"
+                },
+                1878098
+              ]
+            ],
+            "lib/type": "mbql.stage/mbql",
+            "source-table": 48929,
+            "aggregation": [
+              [
+                "count-where",
+                {
+                  "lib/uuid": "a2882c55-9915-491b-a881-13d1570114d6",
+                  "name": "Open For Less Than Or Equal to 30 Days",
+                  "display-name": "Open For Less Than Or Equal to 30 Days"
+                },
+                [
+                  "and",
+                  {
+                    "lib/uuid": "00e2f1bf-c6bc-442f-b253-c88dde2aafe2"
+                  },
+                  [
+                    "=",
+                    {
+                      "lib/uuid": "70314b92-9da8-4e66-a23a-008e2566cc17"
+                    },
+                    [
+                      "field",
+                      {
+                        "lib/uuid": "ea229311-b339-4e3f-848c-3dd8fb832e2c",
+                        "effective-type": "type/Text",
+                        "base-type": "type/Text"
+                      },
+                      1878095
+                    ],
+                    "Open"
+                  ],
+                  [
+                    "<=",
+                    {
+                      "lib/uuid": "aa257898-5fa6-485f-9f0f-98f4b63e676b"
+                    },
+                    [
+                      "datetime-diff",
+                      {
+                        "lib/uuid": "af03b00e-28e0-49b4-9f42-b848bf425708"
+                      },
+                      [
+                        "field",
+                        {
+                          "lib/uuid": "aa4c16a3-a02c-4ebe-b97e-56e0ab315607",
+                          "effective-type": "type/DateTimeWithLocalTZ",
+                          "base-type": "type/DateTimeWithLocalTZ"
+                        },
+                        1878105
+                      ],
+                      [
+                        "now",
+                        {
+                          "lib/uuid": "a80666ca-6ac5-497c-8e1d-d5d4ee7c536b"
+                        }
+                      ],
+                      "day"
+                    ],
+                    30
+                  ]
+                ]
+              ],
+              [
+                "count-where",
+                {
+                  "name": "Open for more than 30 days",
+                  "lib/uuid": "2ce56b3f-dbe1-4049-b5c5-b22a94eff995",
+                  "display-name": "Open for more than 30 days"
+                },
+                [
+                  "and",
+                  {
+                    "lib/uuid": "af05d8df-4e1d-4313-bf2a-18cd72abf40e"
+                  },
+                  [
+                    "=",
+                    {
+                      "lib/uuid": "5e8fe552-c4fa-4466-9beb-fc7856f5bcf7"
+                    },
+                    [
+                      "field",
+                      {
+                        "effective-type": "type/Text",
+                        "lib/uuid": "3bd29882-1212-4842-b5e5-645bd8d0168d",
+                        "base-type": "type/Text"
+                      },
+                      1878095
+                    ],
+                    "Open"
+                  ],
+                  [
+                    ">",
+                    {
+                      "lib/uuid": "2ced2db8-d543-49a1-ab49-0fbfa37d6037"
+                    },
+                    [
+                      "datetime-diff",
+                      {
+                        "lib/uuid": "87d64588-ecc8-4c97-b9a6-0ec3d08c9f72"
+                      },
+                      [
+                        "field",
+                        {
+                          "effective-type": "type/DateTimeWithLocalTZ",
+                          "lib/uuid": "55b6ce37-00a3-4d2b-814a-72988a564fea",
+                          "base-type": "type/DateTimeWithLocalTZ"
+                        },
+                        1878105
+                      ],
+                      [
+                        "now",
+                        {
+                          "lib/uuid": "b9c1d1d6-c889-4378-aa9d-39fc8d085681"
+                        }
+                      ],
+                      "day"
+                    ],
+                    30
+                  ],
+                  [
+                    "<",
+                    {
+                      "lib/uuid": "00e4fb05-e7f1-49af-9a9d-5a5223242432"
+                    },
+                    [
+                      "datetime-diff",
+                      {
+                        "lib/uuid": "aa63fef2-b7a9-4416-9574-6bdf9bd49e9a"
+                      },
+                      [
+                        "field",
+                        {
+                          "effective-type": "type/DateTimeWithLocalTZ",
+                          "lib/uuid": "54af5243-5706-4573-9f2d-094ec295fc0b",
+                          "base-type": "type/DateTimeWithLocalTZ"
+                        },
+                        1878105
+                      ],
+                      [
+                        "now",
+                        {
+                          "lib/uuid": "11d911e7-397e-4fb6-9c90-1b45aebc1227"
+                        }
+                      ],
+                      "day"
+                    ],
+                    60
+                  ]
+                ]
+              ],
+              [
+                "count-where",
+                {
+                  "lib/uuid": "249788dd-2f1f-4801-88a2-27911be2518d",
+                  "name": "Open for more than or equal to 60 days",
+                  "display-name": "Open for more than or equal to 60 days"
+                },
+                [
+                  "and",
+                  {
+                    "lib/uuid": "d04f11fe-cb70-4774-932f-398de5c108cc"
+                  },
+                  [
+                    "=",
+                    {
+                      "lib/uuid": "f4a471cf-aeab-41a1-a994-fcec5ca820e2"
+                    },
+                    [
+                      "field",
+                      {
+                        "lib/uuid": "8180695a-c63e-4863-a285-d1931e407c32",
+                        "effective-type": "type/Text",
+                        "base-type": "type/Text"
+                      },
+                      1878095
+                    ],
+                    "Open"
+                  ],
+                  [
+                    ">=",
+                    {
+                      "lib/uuid": "cf5f3754-3aad-4216-9796-590eba8e6689"
+                    },
+                    [
+                      "datetime-diff",
+                      {
+                        "lib/uuid": "cbfc8705-f179-49ae-bf81-493a2780f1ea"
+                      },
+                      [
+                        "field",
+                        {
+                          "lib/uuid": "58ac9a0a-abe0-424d-9ea5-596605fc4c0e",
+                          "effective-type": "type/DateTimeWithLocalTZ",
+                          "base-type": "type/DateTimeWithLocalTZ"
+                        },
+                        1878105
+                      ],
+                      [
+                        "now",
+                        {
+                          "lib/uuid": "eb7940f0-d943-4f27-8150-922df0da932b"
+                        }
+                      ],
+                      "day"
+                    ],
+                    60
+                  ]
+                ]
+              ],
+              [
+                "count-where",
+                {
+                  "name": "Open for more than 90 days",
+                  "lib/uuid": "d69801fe-7c2c-447b-926e-7b43f279f88a",
+                  "display-name": "Open for more than 90 days"
+                },
+                [
+                  "and",
+                  {
+                    "lib/uuid": "488a6758-8730-4aff-b668-b6a863f77d6c"
+                  },
+                  [
+                    "=",
+                    {
+                      "lib/uuid": "e4bb78ca-1c99-448f-897b-b5802dacd82c"
+                    },
+                    [
+                      "field",
+                      {
+                        "effective-type": "type/Text",
+                        "lib/uuid": "424e874d-3635-413c-98fb-90537818851c",
+                        "base-type": "type/Text"
+                      },
+                      1878095
+                    ],
+                    "Open"
+                  ],
+                  [
+                    ">",
+                    {
+                      "lib/uuid": "61bb5aa6-0efb-4da7-8396-eb231e8c3a84"
+                    },
+                    [
+                      "datetime-diff",
+                      {
+                        "lib/uuid": "cea81eb7-b814-4cdf-a31b-9112a8941fda"
+                      },
+                      [
+                        "field",
+                        {
+                          "effective-type": "type/DateTimeWithLocalTZ",
+                          "lib/uuid": "68ba38fa-1fba-4a93-b549-2d4b6c2bce12",
+                          "base-type": "type/DateTimeWithLocalTZ"
+                        },
+                        1878105
+                      ],
+                      [
+                        "now",
+                        {
+                          "lib/uuid": "144a8dcb-6b26-46d5-b8ee-8183dcf15ff0"
+                        }
+                      ],
+                      "day"
+                    ],
+                    90
+                  ]
+                ]
+              ],
+              [
+                "count-where",
+                {
+                  "lib/uuid": "3134c4be-b063-4813-a445-8d5d7b025dd8",
+                  "name": "Closed Jobs",
+                  "display-name": "Closed Jobs"
+                },
+                [
+                  "=",
+                  {
+                    "lib/uuid": "6e79589f-e486-4f0c-a66d-9c25450568c8"
+                  },
+                  [
+                    "field",
+                    {
+                      "lib/uuid": "3e12be08-276b-4036-953b-9490a78c3497",
+                      "effective-type": "type/Text",
+                      "base-type": "type/Text"
+                    },
+                    1878095
+                  ],
+                  "Closed"
+                ]
+              ],
+              [
+                "count",
+                {
+                  "name": "Total Jobs",
+                  "lib/uuid": "55805f23-221b-4846-9aa9-27fc535406c8",
+                  "display-name": "Total Jobs"
+                }
+              ]
+            ]
+          }
+        ]
+      },
+      "visualization_settings": {
+        "table.pivot_column": "job_name",
+        "table.cell_column": "Job Open Duration",
+        "column_settings": {}
+      },
+      "param_mapping": {
+        "kind": "field",
+        "entity": "jobs",
+        "column": "created_on",
+        "parameter_slug": "date",
+        "base_type": "type/DateTimeWithLocalTZ"
+      }
+    },
+    {
+      "key": "jobs_created_per_month",
+      "source_card_id": 45713,
+      "tab": "Jobs & Hiring Efficiency",
+      "name": "Jobs Created Per Month",
+      "display": "line",
+      "entities": [
+        "jobs"
+      ],
+      "layout": {
+        "row": 39,
+        "col": 0,
+        "size_x": 24,
+        "size_y": 11
+      },
+      "dataset_query": {
+        "database": 13371569,
+        "lib/type": "mbql/query",
+        "stages": [
+          {
+            "aggregation": [
+              [
+                "distinct",
+                {
+                  "lib/uuid": "5fbd54f2-e7b1-4abc-9ef8-6bc386fbd9bc"
+                },
+                [
+                  "field",
+                  {
+                    "effective-type": "type/Integer",
+                    "lib/uuid": "df2ce5ba-5607-4f40-8f0c-23109bfe2a93",
+                    "base-type": "type/Integer"
+                  },
+                  1878075
+                ]
+              ]
+            ],
+            "source-table": 48929,
+            "lib/type": "mbql.stage/mbql",
+            "breakout": [
+              [
+                "field",
+                {
+                  "base-type": "type/DateTimeWithLocalTZ",
+                  "lib/uuid": "e057dc98-e770-4416-a4fe-8f0c29fb78c5",
+                  "effective-type": "type/DateTimeWithLocalTZ",
+                  "temporal-unit": "month"
+                },
+                1878105
+              ]
+            ]
+          }
+        ]
+      },
+      "visualization_settings": {
+        "table.pivot_column": "job_name",
+        "table.cell_column": "Job Open Duration",
+        "graph.show_values": true,
+        "graph.x_axis.scale": "timeseries",
+        "graph.dimensions": [
+          "created_on"
+        ],
+        "column_settings": {},
+        "graph.metrics": [
+          "count"
+        ]
+      },
+      "param_mapping": {
+        "kind": "field",
+        "entity": "jobs",
+        "column": "created_on",
+        "parameter_slug": "date",
+        "base_type": "type/DateTimeWithLocalTZ"
+      }
+    },
+    {
+      "key": "placements_per_month",
+      "source_card_id": 45715,
+      "tab": "Jobs & Hiring Efficiency",
+      "name": "Placements Per Month",
+      "display": "line",
+      "entities": [
+        "assignments"
+      ],
+      "layout": {
+        "row": 50,
+        "col": 0,
+        "size_x": 24,
+        "size_y": 9
+      },
+      "dataset_query": {
+        "database": 13371569,
+        "lib/type": "mbql/query",
+        "stages": [
+          {
+            "filters": [
+              [
+                "=",
+                {
+                  "lib/uuid": "d704e2cc-455b-486d-91dd-389df4140fcc"
+                },
+                [
+                  "field",
+                  {
+                    "lib/uuid": "032c6581-8f57-4524-8e75-4d9d85bb4e8d",
+                    "effective-type": "type/Text",
+                    "base-type": "type/Text"
+                  },
+                  1866443
+                ],
+                "Placed"
+              ]
+            ],
+            "source-table": 48517,
+            "lib/type": "mbql.stage/mbql",
+            "aggregation": [
+              [
+                "distinct",
+                {
+                  "lib/uuid": "87cf7981-45b9-47ed-9ef9-e24a2fed5674"
+                },
+                [
+                  "field",
+                  {
+                    "effective-type": "type/BigInteger",
+                    "lib/uuid": "b1661cab-26d2-4045-9fa8-ea85acfb4af6",
+                    "base-type": "type/BigInteger"
+                  },
+                  1866419
+                ]
+              ]
+            ],
+            "breakout": [
+              [
+                "field",
+                {
+                  "base-type": "type/DateTimeWithLocalTZ",
+                  "lib/uuid": "4e6af906-9906-4e12-9cb5-34eacfede9df",
+                  "effective-type": "type/DateTimeWithLocalTZ",
+                  "temporal-unit": "month"
+                },
+                1866438
+              ]
+            ]
+          }
+        ]
+      },
+      "visualization_settings": {
+        "graph.show_values": true,
+        "graph.y_axis.title_text": "Placed Candidates",
+        "graph.x_axis.scale": "timeseries",
+        "graph.dimensions": [
+          "hiring_stage_date"
+        ],
+        "graph.metrics": [
+          "count"
+        ]
+      },
+      "param_mapping": {
+        "kind": "field",
+        "entity": "assignments",
+        "column": "created_on",
+        "parameter_slug": "date",
+        "base_type": "type/DateTimeWithLocalTZ"
+      }
+    },
+    {
+      "key": "assigned_per_job",
+      "source_card_id": 45719,
+      "tab": "Ratio",
+      "name": "Assigned / Job",
+      "display": "scalar",
+      "entities": [
+        "jobs",
+        "assignments"
+      ],
+      "layout": {
+        "row": 5,
+        "col": 8,
+        "size_x": 8,
+        "size_y": 5
+      },
+      "dataset_query": {
+        "database": 13371569,
+        "lib/type": "mbql/query",
+        "stages": [
+          {
+            "joins": [
+              {
+                "lib/type": "mbql/join",
+                "conditions": [
+                  [
+                    "=",
+                    {
+                      "lib/uuid": "51611090-15c5-4003-885f-8a4851f78f1b"
+                    },
+                    [
+                      "field",
+                      {
+                        "effective-type": "type/Integer",
+                        "lib/uuid": "dd6e59ec-15f5-4dc6-8611-edbb9f00156c",
+                        "base-type": "type/Integer"
+                      },
+                      1878075
+                    ],
+                    [
+                      "field",
+                      {
+                        "effective-type": "type/Integer",
+                        "base-type": "type/Integer",
+                        "lib/uuid": "f387e8af-460b-4a2a-8d78-85f20014fbc1",
+                        "join-alias": "Assign Job Candidate"
+                      },
+                      1866456
+                    ]
+                  ]
+                ],
+                "strategy": "left-join",
+                "stages": [
+                  {
+                    "lib/options": {
+                      "lib/uuid": "411085ba-ca33-4cc4-903e-3ca5ff0829fd"
+                    },
+                    "lib/type": "mbql.stage/mbql",
+                    "source-table": 48517
+                  }
+                ],
+                "lib/options": {
+                  "lib/uuid": "9a5d2e9c-9778-46ad-a09b-fe4376985e9b"
+                },
+                "fields": "all",
+                "alias": "Assign Job Candidate"
+              }
+            ],
+            "source-table": 48929,
+            "lib/type": "mbql.stage/mbql",
+            "aggregation": [
+              [
+                "count-where",
+                {
+                  "name": "Assigned",
+                  "display-name": "Assigned",
+                  "lib/uuid": "eafb9397-a1ff-430c-acf8-8a23e438238b",
+                  "effective-type": "type/Integer"
+                },
+                [
+                  "=",
+                  {
+                    "lib/uuid": "981fe574-9532-421b-a9d9-5eb4457ca3c6"
+                  },
+                  [
+                    "field",
+                    {
+                      "effective-type": "type/Text",
+                      "base-type": "type/Text",
+                      "lib/uuid": "4679d42e-e652-40fb-81b9-ea4a71c45cea",
+                      "join-alias": "Assign Job Candidate"
+                    },
+                    1866443
+                  ],
+                  "Assigned"
+                ]
+              ],
+              [
+                "distinct",
+                {
+                  "name": "Jobs",
+                  "display-name": "Jobs",
+                  "lib/uuid": "3811fd2d-e26a-44f2-b5ac-d95ae3ba5b8a",
+                  "effective-type": "type/Integer"
+                },
+                [
+                  "field",
+                  {
+                    "lib/uuid": "8f37f9b6-12b8-415c-9d1b-736bbabf626a",
+                    "effective-type": "type/Integer",
+                    "base-type": "type/Integer"
+                  },
+                  1878075
+                ]
+              ],
+              [
+                "ceil",
+                {
+                  "display-name": "Ratio",
+                  "lib/uuid": "8b42276c-08d4-454c-85f9-b67b707ff6eb",
+                  "name": "Ratio",
+                  "effective-type": "type/Integer"
+                },
+                [
+                  "/",
+                  {
+                    "lib/uuid": "270541d1-fc3f-4f93-9401-9c08ef34d908"
+                  },
+                  [
+                    "count-where",
+                    {
+                      "lib/uuid": "87adaf83-b459-4074-8611-b68f30a29424"
+                    },
+                    [
+                      "=",
+                      {
+                        "lib/uuid": "4f794b0f-4dfa-433d-8ef0-d8b5ffb2521a"
+                      },
+                      [
+                        "field",
+                        {
+                          "base-type": "type/Text",
+                          "lib/uuid": "a52b15ea-0d20-439a-b7fc-bf74053fb699",
+                          "effective-type": "type/Text",
+                          "join-alias": "Assign Job Candidate"
+                        },
+                        1866443
+                      ],
+                      "Assigned"
+                    ]
+                  ],
+                  [
+                    "distinct",
+                    {
+                      "lib/uuid": "3ef89113-3d6f-45ec-831f-d79719fb9b95"
+                    },
+                    [
+                      "field",
+                      {
+                        "lib/uuid": "42ddaedb-0697-4374-b514-c78964bbb80c",
+                        "effective-type": "type/Integer",
+                        "base-type": "type/Integer"
+                      },
+                      1878075
+                    ]
+                  ]
+                ]
+              ]
+            ]
+          }
+        ]
+      },
+      "visualization_settings": {
+        "scalar.field": "Ratio",
+        "column_settings": {
+          "[\"name\",\"Ratio\"]": {
+            "suffix": " : 1"
+          }
+        }
+      },
+      "param_mapping": {
+        "kind": "field",
+        "entity": "jobs",
+        "column": "created_on",
+        "parameter_slug": "date",
+        "base_type": "type/DateTimeWithLocalTZ"
+      }
+    },
+    {
+      "key": "job_per_placement",
+      "source_card_id": 45720,
+      "tab": "Ratio",
+      "name": "Job / Placement",
+      "display": "scalar",
+      "entities": [
+        "jobs",
+        "assignments"
+      ],
+      "layout": {
+        "row": 5,
+        "col": 16,
+        "size_x": 8,
+        "size_y": 5
+      },
+      "dataset_query": {
+        "database": 13371569,
+        "lib/type": "mbql/query",
+        "stages": [
+          {
+            "source-table": 48929,
+            "lib/type": "mbql.stage/mbql",
+            "joins": [
+              {
+                "lib/type": "mbql/join",
+                "conditions": [
+                  [
+                    "=",
+                    {
+                      "lib/uuid": "51611090-15c5-4003-885f-8a4851f78f1b"
+                    },
+                    [
+                      "field",
+                      {
+                        "lib/uuid": "dd6e59ec-15f5-4dc6-8611-edbb9f00156c",
+                        "effective-type": "type/Integer",
+                        "base-type": "type/Integer"
+                      },
+                      1878075
+                    ],
+                    [
+                      "field",
+                      {
+                        "base-type": "type/Integer",
+                        "lib/uuid": "f387e8af-460b-4a2a-8d78-85f20014fbc1",
+                        "effective-type": "type/Integer",
+                        "join-alias": "Assign Job Candidate"
+                      },
+                      1866456
+                    ]
+                  ]
+                ],
+                "strategy": "left-join",
+                "stages": [
+                  {
+                    "lib/type": "mbql.stage/mbql",
+                    "lib/options": {
+                      "lib/uuid": "411085ba-ca33-4cc4-903e-3ca5ff0829fd"
+                    },
+                    "source-table": 48517
+                  }
+                ],
+                "lib/options": {
+                  "lib/uuid": "9a5d2e9c-9778-46ad-a09b-fe4376985e9b"
+                },
+                "fields": "all",
+                "alias": "Assign Job Candidate"
+              }
+            ],
+            "aggregation": [
+              [
+                "count-where",
+                {
+                  "name": "Placed",
+                  "display-name": "Placed",
+                  "lib/uuid": "7463388a-32cb-4660-a2bb-54271356d5c0",
+                  "effective-type": "type/Integer"
+                },
+                [
+                  "=",
+                  {
+                    "lib/uuid": "43e1650a-2024-43c0-bf7a-bde5479d60a3"
+                  },
+                  [
+                    "field",
+                    {
+                      "effective-type": "type/Text",
+                      "base-type": "type/Text",
+                      "lib/uuid": "3b5ae021-b63b-4c26-b2a9-3afe0473254e",
+                      "join-alias": "Assign Job Candidate"
+                    },
+                    1866443
+                  ],
+                  "Placed"
+                ]
+              ],
+              [
+                "distinct",
+                {
+                  "display-name": "Jobs",
+                  "lib/uuid": "3811fd2d-e26a-44f2-b5ac-d95ae3ba5b8a",
+                  "name": "Jobs",
+                  "effective-type": "type/Integer"
+                },
+                [
+                  "field",
+                  {
+                    "effective-type": "type/Integer",
+                    "lib/uuid": "8f37f9b6-12b8-415c-9d1b-736bbabf626a",
+                    "base-type": "type/Integer"
+                  },
+                  1878075
+                ]
+              ],
+              [
+                "ceil",
+                {
+                  "display-name": "Ratio",
+                  "lib/uuid": "ba738405-041f-41cd-9f91-4b2fe5463361",
+                  "name": "Ratio",
+                  "effective-type": "type/Integer"
+                },
+                [
+                  "/",
+                  {
+                    "lib/uuid": "ad50c01b-37ed-4bad-b3a3-a628da46c845"
+                  },
+                  [
+                    "distinct",
+                    {
+                      "lib/uuid": "099fafd8-41a8-45b9-909d-d3ac6cafe4ae"
+                    },
+                    [
+                      "field",
+                      {
+                        "lib/uuid": "bce2d9e4-340d-4130-98b8-a7a89fe98c5c",
+                        "effective-type": "type/Integer",
+                        "base-type": "type/Integer"
+                      },
+                      1878075
+                    ]
+                  ],
+                  [
+                    "count-where",
+                    {
+                      "lib/uuid": "6b63be3d-678c-4c15-93bc-67a6b02628e5"
+                    },
+                    [
+                      "=",
+                      {
+                        "lib/uuid": "aa375b3a-51d9-4948-ad43-2199d6fc8545"
+                      },
+                      [
+                        "field",
+                        {
+                          "base-type": "type/Text",
+                          "lib/uuid": "127e82d2-953b-4653-8ee7-e76f2cf5eb6d",
+                          "effective-type": "type/Text",
+                          "join-alias": "Assign Job Candidate"
+                        },
+                        1866443
+                      ],
+                      "Placed"
+                    ]
+                  ]
+                ]
+              ]
+            ]
+          }
+        ]
+      },
+      "visualization_settings": {
+        "scalar.field": "Ratio",
+        "column_settings": {
+          "[\"name\",\"Ratio\"]": {
+            "suffix": " : 1"
+          }
+        }
+      },
+      "param_mapping": {
+        "kind": "field",
+        "entity": "jobs",
+        "column": "created_on",
+        "parameter_slug": "date",
+        "base_type": "type/DateTimeWithLocalTZ"
+      }
+    },
+    {
+      "key": "assigned_per_placed",
+      "source_card_id": 45716,
+      "tab": "Ratio",
+      "name": "Assigned / Placed",
+      "display": "scalar",
+      "entities": [
+        "assignments"
+      ],
+      "layout": {
+        "row": 0,
+        "col": 0,
+        "size_x": 12,
+        "size_y": 5
+      },
+      "dataset_query": {
+        "database": 13371569,
+        "lib/type": "mbql/query",
+        "stages": [
+          {
+            "source-table": 48517,
+            "aggregation": [
+              [
+                "count-where",
+                {
+                  "lib/uuid": "39810277-eda8-4a8a-a285-2822243d2e7b",
+                  "name": "Placements",
+                  "display-name": "Placements"
+                },
+                [
+                  "=",
+                  {
+                    "lib/uuid": "757e30be-569d-4e8d-884d-881521336538"
+                  },
+                  [
+                    "field",
+                    {
+                      "lib/uuid": "afb4f4d2-14ce-4db1-bbcb-95751f8afcd2",
+                      "effective-type": "type/Text",
+                      "base-type": "type/Text"
+                    },
+                    1866443
+                  ],
+                  "Placed"
+                ]
+              ],
+              [
+                "count-where",
+                {
+                  "name": "Assignments",
+                  "lib/uuid": "db2ebf5c-19db-4b4a-89c8-6d43543c44f0",
+                  "display-name": "Assignments"
+                },
+                [
+                  "=",
+                  {
+                    "lib/uuid": "c0f7dd59-009d-4cf8-b7b8-51b27dee80d9"
+                  },
+                  [
+                    "field",
+                    {
+                      "effective-type": "type/Text",
+                      "lib/uuid": "271bda08-3ad5-4ed5-b73c-d36faa5e6e94",
+                      "base-type": "type/Text"
+                    },
+                    1866443
+                  ],
+                  "Assigned"
+                ]
+              ]
+            ],
+            "lib/type": "mbql.stage/mbql",
+            "breakout": [
+              [
+                "field",
+                {
+                  "lib/uuid": "52249b91-a4e2-4ca8-b23f-d519a8a27ea8",
+                  "effective-type": "type/BigInteger",
+                  "base-type": "type/BigInteger"
+                },
+                1866419
+              ]
+            ]
+          },
+          {
+            "lib/type": "mbql.stage/mbql",
+            "filters": [
+              [
+                ">",
+                {
+                  "lib/uuid": "0bf47cf0-8245-4c4b-8af6-9bc92233dfba"
+                },
+                [
+                  "field",
+                  {
+                    "effective-type": "type/Integer",
+                    "lib/uuid": "3c0cb214-6f34-462f-9039-6d3df5eea284",
+                    "base-type": "type/Integer"
+                  },
+                  "Assignments"
+                ],
+                0
+              ]
+            ],
+            "aggregation": [
+              [
+                "sum",
+                {
+                  "lib/uuid": "9442c38f-6b6b-4dc3-8a93-43176fed80cb"
+                },
+                [
+                  "field",
+                  {
+                    "lib/uuid": "ecc20b04-dd17-46d8-bf56-60c830c894a2",
+                    "effective-type": "type/Integer",
+                    "base-type": "type/Integer"
+                  },
+                  "Assignments"
+                ]
+              ],
+              [
+                "sum",
+                {
+                  "lib/uuid": "bab1a384-aaff-4ab6-b4de-5c28f0338a80"
+                },
+                [
+                  "field",
+                  {
+                    "effective-type": "type/Integer",
+                    "lib/uuid": "42a23589-c2fe-4c68-ba33-24b1920c0e32",
+                    "base-type": "type/Integer"
+                  },
+                  "Placements"
+                ]
+              ],
+              [
+                "ceil",
+                {
+                  "lib/uuid": "a56523dc-6b05-43e1-bc7a-be193c93e685",
+                  "name": "Ratio",
+                  "display-name": "Ratio"
+                },
+                [
+                  "/",
+                  {
+                    "lib/uuid": "8a6eb70a-34c3-48c5-a546-5844e2d8819b"
+                  },
+                  [
+                    "sum",
+                    {
+                      "lib/uuid": "3aafffbe-12fe-4d11-8e97-010b7ab36129"
+                    },
+                    [
+                      "field",
+                      {
+                        "lib/uuid": "677301fe-ea2d-4a08-a264-21a42a9f6ca2",
+                        "effective-type": "type/Integer",
+                        "base-type": "type/Integer"
+                      },
+                      "Assignments"
+                    ]
+                  ],
+                  [
+                    "sum",
+                    {
+                      "lib/uuid": "1eb7351c-7078-41de-921c-a4cb3262c047"
+                    },
+                    [
+                      "field",
+                      {
+                        "lib/uuid": "5ce816a4-5753-404a-864f-282a6926eaa9",
+                        "effective-type": "type/Integer",
+                        "base-type": "type/Integer"
+                      },
+                      "Placements"
+                    ]
+                  ]
+                ]
+              ]
+            ]
+          }
+        ]
+      },
+      "visualization_settings": {
+        "scalar.field": "Ratio",
+        "column_settings": {
+          "[\"name\",\"Ratio\"]": {
+            "suffix": " : 1"
+          }
+        }
+      },
+      "param_mapping": {
+        "kind": "field",
+        "entity": "assignments",
+        "column": "job_created_on",
+        "parameter_slug": "date",
+        "base_type": "type/DateTimeWithLocalTZ"
+      }
+    },
+    {
+      "key": "applied_per_placed",
+      "source_card_id": 45717,
+      "tab": "Ratio",
+      "name": "Applied / Placed",
+      "display": "scalar",
+      "entities": [
+        "assignments"
+      ],
+      "layout": {
+        "row": 0,
+        "col": 12,
+        "size_x": 12,
+        "size_y": 5
+      },
+      "dataset_query": {
+        "database": 13371569,
+        "lib/type": "mbql/query",
+        "stages": [
+          {
+            "lib/type": "mbql.stage/mbql",
+            "source-table": 48517,
+            "aggregation": [
+              [
+                "count-where",
+                {
+                  "lib/uuid": "39810277-eda8-4a8a-a285-2822243d2e7b",
+                  "name": "Placements",
+                  "display-name": "Placements"
+                },
+                [
+                  "=",
+                  {
+                    "lib/uuid": "757e30be-569d-4e8d-884d-881521336538"
+                  },
+                  [
+                    "field",
+                    {
+                      "lib/uuid": "afb4f4d2-14ce-4db1-bbcb-95751f8afcd2",
+                      "effective-type": "type/Text",
+                      "base-type": "type/Text"
+                    },
+                    1866443
+                  ],
+                  "Placed"
+                ]
+              ],
+              [
+                "count-where",
+                {
+                  "display-name": "Applied",
+                  "lib/uuid": "78a3a4b7-5839-4657-8da8-7edf211d2d67",
+                  "name": "Applied",
+                  "effective-type": "type/Integer"
+                },
+                [
+                  "=",
+                  {
+                    "lib/uuid": "67f07da5-cd58-4a25-8501-2e2cbce5ee3b"
+                  },
+                  [
+                    "field",
+                    {
+                      "lib/uuid": "686de993-688d-4326-8ae5-c445c87f8ac7",
+                      "effective-type": "type/Text",
+                      "base-type": "type/Text"
+                    },
+                    1866443
+                  ],
+                  "Applied"
+                ]
+              ]
+            ],
+            "breakout": [
+              [
+                "field",
+                {
+                  "lib/uuid": "52249b91-a4e2-4ca8-b23f-d519a8a27ea8",
+                  "effective-type": "type/BigInteger",
+                  "base-type": "type/BigInteger"
+                },
+                1866419
+              ]
+            ]
+          },
+          {
+            "lib/type": "mbql.stage/mbql",
+            "filters": [
+              [
+                ">",
+                {
+                  "lib/uuid": "0bf47cf0-8245-4c4b-8af6-9bc92233dfba"
+                },
+                [
+                  "field",
+                  {
+                    "lib/uuid": "ee406255-bdf2-409a-a2fc-d2591750e3a2",
+                    "effective-type": "type/Integer",
+                    "base-type": "type/Integer"
+                  },
+                  "Applied"
+                ],
+                0
+              ]
+            ],
+            "aggregation": [
+              [
+                "sum",
+                {
+                  "lib/uuid": "9442c38f-6b6b-4dc3-8a93-43176fed80cb"
+                },
+                [
+                  "field",
+                  {
+                    "lib/uuid": "bc181c19-35d0-46cd-ac1c-b0b28657a73d",
+                    "effective-type": "type/Integer",
+                    "base-type": "type/Integer"
+                  },
+                  "Applied"
+                ]
+              ],
+              [
+                "sum",
+                {
+                  "lib/uuid": "bab1a384-aaff-4ab6-b4de-5c28f0338a80"
+                },
+                [
+                  "field",
+                  {
+                    "effective-type": "type/Integer",
+                    "lib/uuid": "42a23589-c2fe-4c68-ba33-24b1920c0e32",
+                    "base-type": "type/Integer"
+                  },
+                  "Placements"
+                ]
+              ],
+              [
+                "ceil",
+                {
+                  "lib/uuid": "a56523dc-6b05-43e1-bc7a-be193c93e685",
+                  "name": "Ratio",
+                  "display-name": "Ratio"
+                },
+                [
+                  "/",
+                  {
+                    "lib/uuid": "8a6eb70a-34c3-48c5-a546-5844e2d8819b"
+                  },
+                  [
+                    "sum",
+                    {
+                      "lib/uuid": "3aafffbe-12fe-4d11-8e97-010b7ab36129"
+                    },
+                    [
+                      "field",
+                      {
+                        "lib/uuid": "b5fe7377-e68c-4fdf-9db9-7ac753a41d21",
+                        "effective-type": "type/Integer",
+                        "base-type": "type/Integer"
+                      },
+                      "Applied"
+                    ]
+                  ],
+                  [
+                    "sum",
+                    {
+                      "lib/uuid": "1eb7351c-7078-41de-921c-a4cb3262c047"
+                    },
+                    [
+                      "field",
+                      {
+                        "lib/uuid": "5ce816a4-5753-404a-864f-282a6926eaa9",
+                        "effective-type": "type/Integer",
+                        "base-type": "type/Integer"
+                      },
+                      "Placements"
+                    ]
+                  ]
+                ]
+              ]
+            ]
+          }
+        ]
+      },
+      "visualization_settings": {
+        "scalar.field": "Ratio",
+        "column_settings": {
+          "[\"name\",\"Ratio\"]": {
+            "suffix": " : 1"
+          }
+        }
+      },
+      "param_mapping": {
+        "kind": "field",
+        "entity": "assignments",
+        "column": "job_created_on",
+        "parameter_slug": "date",
+        "base_type": "type/DateTimeWithLocalTZ"
+      }
+    },
+    {
+      "key": "applied_per_job",
+      "source_card_id": 45718,
+      "tab": "Ratio",
+      "name": "Applied / Job",
+      "display": "scalar",
+      "entities": [
+        "jobs",
+        "assignments"
+      ],
+      "layout": {
+        "row": 5,
+        "col": 0,
+        "size_x": 8,
+        "size_y": 5
+      },
+      "dataset_query": {
+        "database": 13371569,
+        "lib/type": "mbql/query",
+        "stages": [
+          {
+            "lib/type": "mbql.stage/mbql",
+            "joins": [
+              {
+                "lib/type": "mbql/join",
+                "conditions": [
+                  [
+                    "=",
+                    {
+                      "lib/uuid": "51611090-15c5-4003-885f-8a4851f78f1b"
+                    },
+                    [
+                      "field",
+                      {
+                        "lib/uuid": "dd6e59ec-15f5-4dc6-8611-edbb9f00156c",
+                        "effective-type": "type/Integer",
+                        "base-type": "type/Integer"
+                      },
+                      1878075
+                    ],
+                    [
+                      "field",
+                      {
+                        "lib/uuid": "f387e8af-460b-4a2a-8d78-85f20014fbc1",
+                        "effective-type": "type/Integer",
+                        "base-type": "type/Integer",
+                        "join-alias": "Assign Job Candidate"
+                      },
+                      1866456
+                    ]
+                  ]
+                ],
+                "strategy": "left-join",
+                "stages": [
+                  {
+                    "lib/type": "mbql.stage/mbql",
+                    "lib/options": {
+                      "lib/uuid": "411085ba-ca33-4cc4-903e-3ca5ff0829fd"
+                    },
+                    "source-table": 48517
+                  }
+                ],
+                "lib/options": {
+                  "lib/uuid": "9a5d2e9c-9778-46ad-a09b-fe4376985e9b"
+                },
+                "fields": "all",
+                "alias": "Assign Job Candidate"
+              }
+            ],
+            "source-table": 48929,
+            "aggregation": [
+              [
+                "count-where",
+                {
+                  "name": "Applied",
+                  "lib/uuid": "fe4c6c26-06a4-4289-a87f-ae5bb5ed8d12",
+                  "display-name": "Applied"
+                },
+                [
+                  "=",
+                  {
+                    "lib/uuid": "546b6371-fede-453a-b822-8b6f1f662aba"
+                  },
+                  [
+                    "field",
+                    {
+                      "effective-type": "type/Text",
+                      "base-type": "type/Text",
+                      "lib/uuid": "efa1b505-13b5-4f19-b27d-fff4782bc7ee",
+                      "join-alias": "Assign Job Candidate"
+                    },
+                    1866443
+                  ],
+                  "Applied"
+                ]
+              ],
+              [
+                "distinct",
+                {
+                  "lib/uuid": "3811fd2d-e26a-44f2-b5ac-d95ae3ba5b8a",
+                  "name": "Jobs",
+                  "display-name": "Jobs",
+                  "effective-type": "type/Integer"
+                },
+                [
+                  "field",
+                  {
+                    "effective-type": "type/Integer",
+                    "lib/uuid": "8f37f9b6-12b8-415c-9d1b-736bbabf626a",
+                    "base-type": "type/Integer"
+                  },
+                  1878075
+                ]
+              ],
+              [
+                "ceil",
+                {
+                  "lib/uuid": "a7f4e682-3d95-46e2-bfea-cb90d91a11f1",
+                  "name": "Ratio",
+                  "display-name": "Ratio"
+                },
+                [
+                  "/",
+                  {
+                    "lib/uuid": "fd612f0d-4da6-4033-a314-1f44424d9439"
+                  },
+                  [
+                    "count-where",
+                    {
+                      "lib/uuid": "0593fab3-e0a7-4a4c-abaf-62dbae9ccf93"
+                    },
+                    [
+                      "=",
+                      {
+                        "lib/uuid": "9ee1fdb0-5658-474a-8235-f55aabc1c7b1"
+                      },
+                      [
+                        "field",
+                        {
+                          "effective-type": "type/Text",
+                          "base-type": "type/Text",
+                          "lib/uuid": "4efc5f3c-5493-45cd-897f-e178b31de0e2",
+                          "join-alias": "Assign Job Candidate"
+                        },
+                        1866443
+                      ],
+                      "Applied"
+                    ]
+                  ],
+                  [
+                    "distinct",
+                    {
+                      "lib/uuid": "39549af9-fed7-4953-9d17-2714791fdaf4"
+                    },
+                    [
+                      "field",
+                      {
+                        "lib/uuid": "90bc4342-124f-4491-897a-3233f637e289",
+                        "effective-type": "type/Integer",
+                        "base-type": "type/Integer"
+                      },
+                      1878075
+                    ]
+                  ]
+                ]
+              ]
+            ]
+          }
+        ]
+      },
+      "visualization_settings": {
+        "scalar.field": "Ratio",
+        "column_settings": {
+          "[\"name\",\"Ratio\"]": {
+            "suffix": " : 1"
+          }
+        }
+      },
+      "param_mapping": {
+        "kind": "field",
+        "entity": "jobs",
+        "column": "created_on",
+        "parameter_slug": "date",
+        "base_type": "type/DateTimeWithLocalTZ"
+      }
+    },
+    {
+      "key": "candidate_distribution_by_city",
+      "source_card_id": 45726,
+      "tab": "Diversity",
+      "name": "Candidate Distribution By City",
+      "display": "pie",
+      "entities": [
+        "candidates"
+      ],
+      "layout": {
+        "row": 0,
+        "col": 0,
+        "size_x": 12,
+        "size_y": 8
+      },
+      "dataset_query": {
+        "database": 13371569,
+        "lib/type": "mbql/query",
+        "stages": [
+          {
+            "lib/type": "mbql.stage/mbql",
+            "source-table": 48691,
+            "aggregation": [
+              [
+                "distinct",
+                {
+                  "lib/uuid": "134b4579-b7c5-4f48-ba52-68fbaa8c7326"
+                },
+                [
+                  "field",
+                  {
+                    "effective-type": "type/Integer",
+                    "lib/uuid": "8b5dc491-da71-4fff-8a0c-ca7eebc203fc",
+                    "base-type": "type/Integer"
+                  },
+                  1870767
+                ]
+              ]
+            ],
+            "breakout": [
+              [
+                "field",
+                {
+                  "lib/uuid": "26567ddb-f713-4b25-9448-25a7e4a2115a",
+                  "effective-type": "type/Text",
+                  "base-type": "type/Text"
+                },
+                1870779
+              ]
+            ]
+          }
+        ]
+      },
+      "visualization_settings": {
+        "pie.percent_visibility": "both"
+      },
+      "param_mapping": {
+        "kind": "field",
+        "entity": "candidates",
+        "column": "created_on",
+        "parameter_slug": "date",
+        "base_type": "type/DateTimeWithLocalTZ"
+      }
+    },
+    {
+      "key": "candidate_distribution_by_work_experience",
+      "source_card_id": 45725,
+      "tab": "Diversity",
+      "name": "Candidate Distribution By Work Experience",
+      "display": "pie",
+      "entities": [
+        "candidates"
+      ],
+      "layout": {
+        "row": 0,
+        "col": 12,
+        "size_x": 12,
+        "size_y": 8
+      },
+      "dataset_query": {
+        "database": 13371569,
+        "lib/type": "mbql/query",
+        "stages": [
+          {
+            "breakout": [
+              [
+                "expression",
+                {
+                  "lib/uuid": "149e999e-12d2-449d-a34d-11d80deeaf2b",
+                  "base-type": "type/Text",
+                  "effective-type": "type/Text"
+                },
+                "Exp Group"
+              ]
+            ],
+            "aggregation": [
+              [
+                "distinct",
+                {
+                  "lib/uuid": "134b4579-b7c5-4f48-ba52-68fbaa8c7326"
+                },
+                [
+                  "field",
+                  {
+                    "lib/uuid": "8b5dc491-da71-4fff-8a0c-ca7eebc203fc",
+                    "effective-type": "type/Integer",
+                    "base-type": "type/Integer"
+                  },
+                  1870767
+                ]
+              ]
+            ],
+            "source-table": 48691,
+            "lib/type": "mbql.stage/mbql",
+            "expressions": [
+              [
+                "case",
+                {
+                  "lib/uuid": "9f2e3c77-bc33-4f3c-936e-f5cd458c2ce1",
+                  "lib/expression-name": "Exp Group"
+                },
+                [
+                  [
+                    [
+                      "between",
+                      {
+                        "lib/uuid": "03f89b9e-0501-4b25-9643-d672a0a5a76d"
+                      },
+                      [
+                        "field",
+                        {
+                          "effective-type": "type/Integer",
+                          "lib/uuid": "9c177f76-1452-4ed0-afa9-670ca6ce98fe",
+                          "base-type": "type/Integer"
+                        },
+                        1870791
+                      ],
+                      0,
+                      2
+                    ],
+                    "0-2"
+                  ],
+                  [
+                    [
+                      "between",
+                      {
+                        "lib/uuid": "ba4648ca-cd6c-49ef-8a42-d081de295f0f"
+                      },
+                      [
+                        "field",
+                        {
+                          "effective-type": "type/Integer",
+                          "lib/uuid": "c265aa48-2246-4cd9-a45a-477ff95b1037",
+                          "base-type": "type/Integer"
+                        },
+                        1870791
+                      ],
+                      3,
+                      4
+                    ],
+                    "3-4"
+                  ],
+                  [
+                    [
+                      "between",
+                      {
+                        "lib/uuid": "66b9ee11-578f-457c-a3c8-d1ca982f56a3"
+                      },
+                      [
+                        "field",
+                        {
+                          "effective-type": "type/Integer",
+                          "lib/uuid": "1a6f9afc-a447-4837-934e-dd1ece71ca6e",
+                          "base-type": "type/Integer"
+                        },
+                        1870791
+                      ],
+                      5,
+                      7
+                    ],
+                    "5-7"
+                  ],
+                  [
+                    [
+                      "between",
+                      {
+                        "lib/uuid": "6fbb4920-317f-4cfa-b357-9e642ae9ea79"
+                      },
+                      [
+                        "field",
+                        {
+                          "effective-type": "type/Integer",
+                          "lib/uuid": "9f3743b1-a16e-45f1-b4e0-0b3f8dd05b54",
+                          "base-type": "type/Integer"
+                        },
+                        1870791
+                      ],
+                      8,
+                      10
+                    ],
+                    "8-10"
+                  ],
+                  [
+                    [
+                      "between",
+                      {
+                        "lib/uuid": "b5601c1c-b203-40ae-a4b3-3d96267f2a6e"
+                      },
+                      [
+                        "field",
+                        {
+                          "effective-type": "type/Integer",
+                          "lib/uuid": "6e786839-c30a-4dcb-9850-836eaf0e6107",
+                          "base-type": "type/Integer"
+                        },
+                        1870791
+                      ],
+                      11,
+                      15
+                    ],
+                    "11-15"
+                  ],
+                  [
+                    [
+                      ">",
+                      {
+                        "lib/uuid": "db5be2e9-1ef7-44d8-acf6-8e4760a7ed9d"
+                      },
+                      [
+                        "field",
+                        {
+                          "effective-type": "type/Integer",
+                          "lib/uuid": "d1985b2e-d770-40c2-b8e2-609d2da689f3",
+                          "base-type": "type/Integer"
+                        },
+                        1870791
+                      ],
+                      15
+                    ],
+                    "15+"
+                  ]
+                ]
+              ]
+            ]
+          }
+        ]
+      },
+      "visualization_settings": {
+        "pie.percent_visibility": "both"
+      },
+      "param_mapping": {
+        "kind": "field",
+        "entity": "candidates",
+        "column": "created_on",
+        "parameter_slug": "date",
+        "base_type": "type/DateTimeWithLocalTZ"
+      }
+    },
+    {
+      "key": "gender_distribution",
+      "source_card_id": 45724,
+      "tab": "Diversity",
+      "name": "Gender Distribution",
+      "display": "pie",
+      "entities": [
+        "candidates"
+      ],
+      "layout": {
+        "row": 8,
+        "col": 0,
+        "size_x": 12,
+        "size_y": 8
+      },
+      "dataset_query": {
+        "database": 13371569,
+        "lib/type": "mbql/query",
+        "stages": [
+          {
+            "aggregation": [
+              [
+                "distinct",
+                {
+                  "lib/uuid": "134b4579-b7c5-4f48-ba52-68fbaa8c7326"
+                },
+                [
+                  "field",
+                  {
+                    "effective-type": "type/Integer",
+                    "lib/uuid": "8b5dc491-da71-4fff-8a0c-ca7eebc203fc",
+                    "base-type": "type/Integer"
+                  },
+                  1870767
+                ]
+              ]
+            ],
+            "source-table": 48691,
+            "lib/type": "mbql.stage/mbql",
+            "breakout": [
+              [
+                "field",
+                {
+                  "lib/uuid": "fbe5eb0e-80b1-4c11-8aa0-c33779a5268f",
+                  "effective-type": "type/Text",
+                  "base-type": "type/Text"
+                },
+                1870777
+              ]
+            ]
+          }
+        ]
+      },
+      "visualization_settings": {
+        "pie.percent_visibility": "both"
+      },
+      "param_mapping": {
+        "kind": "field",
+        "entity": "candidates",
+        "column": "created_on",
+        "parameter_slug": "date",
+        "base_type": "type/DateTimeWithLocalTZ"
+      }
+    },
+    {
+      "key": "applied_trend",
+      "source_card_id": 45721,
+      "tab": "Trends",
+      "name": "Applied",
+      "display": "smartscalar",
+      "entities": [
+        "assignments"
+      ],
+      "layout": {
+        "row": 0,
+        "col": 0,
+        "size_x": 8,
+        "size_y": 6
+      },
+      "dataset_query": {
+        "database": 13371569,
+        "lib/type": "mbql/query",
+        "stages": [
+          {
+            "filters": [
+              [
+                "=",
+                {
+                  "lib/uuid": "7a95750b-ebae-4d08-8fe1-657f93877337"
+                },
+                [
+                  "field",
+                  {
+                    "lib/uuid": "2241d5e1-2b65-4dc6-8ccc-ba75557e4415",
+                    "effective-type": "type/Text",
+                    "base-type": "type/Text"
+                  },
+                  1866443
+                ],
+                "Applied"
+              ]
+            ],
+            "source-table": 48517,
+            "lib/type": "mbql.stage/mbql",
+            "aggregation": [
+              [
+                "distinct",
+                {
+                  "lib/uuid": "c383cd4f-ed57-4c15-9655-651b0c5ef719"
+                },
+                [
+                  "field",
+                  {
+                    "effective-type": "type/BigInteger",
+                    "lib/uuid": "013099bf-ec4d-4b08-ba6f-7b317227f15b",
+                    "base-type": "type/BigInteger"
+                  },
+                  1866419
+                ]
+              ]
+            ],
+            "breakout": [
+              [
+                "field",
+                {
+                  "base-type": "type/DateTimeWithLocalTZ",
+                  "lib/uuid": "944e020e-7408-4436-85f2-57075bf2341a",
+                  "effective-type": "type/DateTimeWithLocalTZ",
+                  "temporal-unit": "quarter"
+                },
+                1866438
+              ]
+            ]
+          }
+        ]
+      },
+      "visualization_settings": {
+        "scalar.field": "Ratio",
+        "column_settings": {}
+      },
+      "param_mapping": {
+        "kind": "field",
+        "entity": "assignments",
+        "column": "job_created_on",
+        "parameter_slug": "date",
+        "base_type": "type/DateTimeWithLocalTZ"
+      }
+    },
+    {
+      "key": "assigned_trend",
+      "source_card_id": 45722,
+      "tab": "Trends",
+      "name": "Assigned",
+      "display": "smartscalar",
+      "entities": [
+        "assignments"
+      ],
+      "layout": {
+        "row": 0,
+        "col": 8,
+        "size_x": 8,
+        "size_y": 6
+      },
+      "dataset_query": {
+        "database": 13371569,
+        "lib/type": "mbql/query",
+        "stages": [
+          {
+            "filters": [
+              [
+                "=",
+                {
+                  "lib/uuid": "fe68fcd8-8ad5-4285-a99d-f047eae3a96d",
+                  "effective-type": "type/Boolean"
+                },
+                [
+                  "field",
+                  {
+                    "lib/uuid": "dbb9195b-416d-4bfe-8cee-f3531686e2dc",
+                    "effective-type": "type/Text",
+                    "base-type": "type/Text"
+                  },
+                  1866443
+                ],
+                "Assigned"
+              ]
+            ],
+            "source-table": 48517,
+            "lib/type": "mbql.stage/mbql",
+            "aggregation": [
+              [
+                "distinct",
+                {
+                  "lib/uuid": "c383cd4f-ed57-4c15-9655-651b0c5ef719"
+                },
+                [
+                  "field",
+                  {
+                    "effective-type": "type/BigInteger",
+                    "lib/uuid": "013099bf-ec4d-4b08-ba6f-7b317227f15b",
+                    "base-type": "type/BigInteger"
+                  },
+                  1866419
+                ]
+              ]
+            ],
+            "breakout": [
+              [
+                "field",
+                {
+                  "effective-type": "type/DateTimeWithLocalTZ",
+                  "base-type": "type/DateTimeWithLocalTZ",
+                  "lib/uuid": "944e020e-7408-4436-85f2-57075bf2341a",
+                  "temporal-unit": "quarter"
+                },
+                1866438
+              ]
+            ]
+          }
+        ]
+      },
+      "visualization_settings": {
+        "scalar.field": "Ratio",
+        "column_settings": {}
+      },
+      "param_mapping": {
+        "kind": "field",
+        "entity": "assignments",
+        "column": "job_created_on",
+        "parameter_slug": "date",
+        "base_type": "type/DateTimeWithLocalTZ"
+      }
+    },
+    {
+      "key": "placed_trend",
+      "source_card_id": 45723,
+      "tab": "Trends",
+      "name": "Placed",
+      "display": "smartscalar",
+      "entities": [
+        "assignments"
+      ],
+      "layout": {
+        "row": 0,
+        "col": 16,
+        "size_x": 8,
+        "size_y": 6
+      },
+      "dataset_query": {
+        "database": 13371569,
+        "lib/type": "mbql/query",
+        "stages": [
+          {
+            "filters": [
+              [
+                "=",
+                {
+                  "lib/uuid": "822cdc0d-86e6-4237-b93f-d2dfabc5a7b0",
+                  "effective-type": "type/Boolean"
+                },
+                [
+                  "field",
+                  {
+                    "lib/uuid": "c0a02387-8f35-44a1-a004-b0093132028b",
+                    "effective-type": "type/Text",
+                    "base-type": "type/Text"
+                  },
+                  1866443
+                ],
+                "Placed"
+              ]
+            ],
+            "source-table": 48517,
+            "lib/type": "mbql.stage/mbql",
+            "aggregation": [
+              [
+                "distinct",
+                {
+                  "lib/uuid": "c383cd4f-ed57-4c15-9655-651b0c5ef719"
+                },
+                [
+                  "field",
+                  {
+                    "effective-type": "type/BigInteger",
+                    "lib/uuid": "013099bf-ec4d-4b08-ba6f-7b317227f15b",
+                    "base-type": "type/BigInteger"
+                  },
+                  1866419
+                ]
+              ]
+            ],
+            "breakout": [
+              [
+                "field",
+                {
+                  "lib/uuid": "944e020e-7408-4436-85f2-57075bf2341a",
+                  "effective-type": "type/DateTimeWithLocalTZ",
+                  "base-type": "type/DateTimeWithLocalTZ",
+                  "temporal-unit": "quarter"
+                },
+                1866438
+              ]
+            ]
+          }
+        ]
+      },
+      "visualization_settings": {
+        "scalar.field": "Ratio",
+        "column_settings": {}
+      },
+      "param_mapping": {
+        "kind": "field",
+        "entity": "assignments",
+        "column": "job_created_on",
+        "parameter_slug": "date",
+        "base_type": "type/DateTimeWithLocalTZ"
+      }
+    }
+  ]
+}

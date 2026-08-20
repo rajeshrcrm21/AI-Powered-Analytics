@@ -15,6 +15,9 @@ reading it rather than for Claude executing it.
    - **Default Dashboard** — the standardized onboarding dashboard every
      Advanced Analytics client gets, built automatically (see "Default
      Dashboard flow" below).
+   - **Important Metrics Dashboard** — the standardized hiring-efficiency
+     dashboard every Advanced Analytics client gets, also built
+     automatically (see "Important Metrics Dashboard flow" below).
    - **Transcript to Insights** — turn a client meeting transcript into
      chart recommendations grounded in that account's real data (see
      "Transcript to Insights flow" below).
@@ -58,6 +61,24 @@ reading it rather than for Claude executing it.
    skipped (and why), and the collections involved: the dashboard directly
    in the account's "Data Team WIP" sub-collection, its cards one level
    deeper in a nested "Default Dashboard Charts" sub-collection.
+4. If the script fails or skips, Claude relays that plainly rather than
+   forcing something.
+
+## Important Metrics Dashboard flow
+
+1. Claude asks: **"Which Recruit CRM account would you like to build the
+   important metrics dashboard for? Please provide the account number."**
+2. Claude runs `scripts/create_important_metrics_dashboard.py`, which
+   discovers the account's actual tables via `mb`, builds the same fixed set
+   of hiring-efficiency/ratio/trend/candidate-diversity charts every account
+   gets (skipping any chart whose underlying entity doesn't exist for this
+   account), and assembles them into a dashboard — dry-run validating every
+   query first, and stopping rather than touching anything if an important
+   metrics dashboard already exists for the account.
+3. Claude reports back the dashboard id/link, which cards were created vs.
+   skipped (and why), and the collections involved: the dashboard directly
+   in the account's "Data Team WIP" sub-collection, its cards one level
+   deeper in a nested "Important Metrics Dashboard Charts" sub-collection.
 4. If the script fails or skips, Claude relays that plainly rather than
    forcing something.
 
