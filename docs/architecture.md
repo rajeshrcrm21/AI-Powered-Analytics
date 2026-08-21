@@ -12,8 +12,24 @@ Claude (this conversation, in VS Code)
 mb auth list / status        (verify Metabase CLI config)
   |
   v
-Ask which kind of work: Recommendation Engine / Default Dashboard /
+Ask which kind of work: General / Recommendation Engine / Default Dashboard /
                          Important Metrics Dashboard / Transcript to Insights
+  |
+  +-- General ---------------------------------------------------------+
+  |     Ask account -> ask "What would you like to build?" (free text) |
+  |       |                                                            |
+  |       v                                                            |
+  |     mb database / table / field  (discover only what the request  |
+  |                                    needs - not full multi-entity)  |
+  |       |                                                            |
+  |       v                                                            |
+  |     Claude checks data-quality gate + mb search for duplicates     |
+  |       |                                                            |
+  |       v                                                            |
+  |     mb card create / get  (create + verify, under "Data Team WIP" |
+  |                             > <account>, confirming first only if  |
+  |                             the request is ambiguous/multi-chart)  |
+  +--------------------------------------------------------------------+
   |
   +-- Recommendation Engine -----------------------------------------+
   |     Ask account -> ask entity/focus scope -> ask rec. count      |
@@ -89,12 +105,13 @@ Every flow appends to logs/history.jsonl (local-only, git-ignored) and
 results are returned to the user in the terminal.
 ```
 
-A `.claude/settings.json` hook enforces the history-log step for the two
-flows that create cards/dashboards directly in the conversation: it flags
-(via a `Stop` hook) if `mb card create` / `mb dashboard create` ran but
-`logs/history.jsonl` was never appended to before the session ends. The
-Default Dashboard and Important Metrics Dashboard scripts log themselves in
-code instead (see `scripts/create_default_dashboard.py` and
+A `.claude/settings.json` hook enforces the history-log step for the flows
+that create cards/dashboards directly in the conversation (General,
+Recommendation Engine, Transcript to Insights): it flags (via a `Stop` hook)
+if `mb card create` / `mb dashboard create` ran but `logs/history.jsonl` was
+never appended to before the session ends. The Default Dashboard and
+Important Metrics Dashboard scripts log themselves in code instead (see
+`scripts/create_default_dashboard.py` and
 `scripts/create_important_metrics_dashboard.py`).
 
 ## What does not exist here
@@ -125,19 +142,21 @@ often-unreachable duplicate copy. Deals, Assignments, Pitched Candidates, and
 Notes/Tasks/Meetings can have multiple rows sharing the same `id` by design
 (a new row per stage/status/association change, not a data bug) — every
 count on every entity uses `COUNT(DISTINCT id)` as a defensive default. See
-CLAUDE.md's "standing knowledge" section for the full rules, including how a
-candidate's current pipeline stage is determined (ordinal `CASE` ranking,
-never `MAX(stage_date)`).
+CLAUDE.md's "standing knowledge" section for the full rules, including the
+distinction between a candidate's **latest** hiring stage (most recent
+`hiring_stage` by `MAX(stage_date)`, no ranking involved) and their
+**maximum/farthest** hiring stage (ordinal `CASE` ranking, never trusted to
+`MAX(stage_date)` alone).
 
 ## Files
 
 - `CLAUDE.md` — persistent operating instructions (read first, every time),
-  including the four-flow branch, the data-model standing knowledge, and
+  including the five-flow branch, the data-model standing knowledge, and
   the history-log requirements
 - `prompts/` — the workflow-stage prompts referenced from CLAUDE.md:
   `discovery.md`, `analysis.md`, `recommendation.md`, `chart-generation.md`
-  (Recommendation Engine flow) and `transcript-insights.md` (Transcript to
-  Insights flow)
+  (Recommendation Engine flow, also drawn on directly by the General flow)
+  and `transcript-insights.md` (Transcript to Insights flow)
 - `config/analysis-config.md` — tunable defaults/weights
 - `docs/workflow.md` — the same flows, written for a human teammate
 - `scripts/mb-login.sh` — thin helper that reads `.env` and calls
@@ -158,4 +177,4 @@ never `MAX(stage_date)`).
   account's own data
 - `logs/history.jsonl` — local-only, git-ignored audit trail of what was
   analyzed/recommended/created; enforced by hooks in `.claude/settings.json`
-  for the Recommendation Engine and Transcript to Insights flows
+  for the General, Recommendation Engine, and Transcript to Insights flows

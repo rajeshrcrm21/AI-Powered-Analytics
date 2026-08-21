@@ -18,10 +18,13 @@ just something to remember for Deals, Assignments, Pitched Candidates, and
 Notes/Tasks/Meetings (the entities that actually have duplicate-id rows
 today). Remember Deal *value* is already split across duplicate-id rows (so
 `SUM()` is correct as-is for value, but not for counting deals — that still
-needs `COUNT(DISTINCT id)`). When a query needs a candidate's current/
-furthest pipeline stage, use the stage-ordinal `CASE` + `MAX(ordinal)`
-technique from CLAUDE.md rather than trusting stage-change timestamps, which
-are often only seconds apart.
+needs `COUNT(DISTINCT id)`). A candidate's **latest** hiring stage and their
+**maximum/farthest** hiring stage are different questions — per CLAUDE.md,
+"latest" is the most recent `hiring_stage` value by `MAX(stage_date)` (no
+CASE ranking), while "maximum/farthest" needs the stage-ordinal `CASE` +
+`MAX(ordinal)` technique rather than trusting stage-change timestamps, which
+are often only seconds apart and don't reliably reflect funnel order. Pick
+the one the question actually calls for.
 
 ## Example angles to investigate (not a checklist — pursue what the data supports)
 

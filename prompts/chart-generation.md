@@ -14,7 +14,7 @@ using only fields that were actually discovered — never assumed schema.
      visual query builder (MBQL — load the `mbql` skill) by default. Only
      fall back to native SQL (load `native-sql`) when the required logic
      genuinely cannot be expressed in MBQL (e.g. the stage-ordinal `CASE`
-     ranking from CLAUDE.md's "current pipeline stage" rule, window
+     ranking from CLAUDE.md's "maximum/farthest hiring stage" rule, window
      functions, or other computations the GUI builder can't represent). If
      you fall back to SQL, state explicitly why MBQL wasn't sufficient.
    - Use only tables/fields confirmed to exist during discovery.

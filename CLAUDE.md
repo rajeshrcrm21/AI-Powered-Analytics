@@ -60,9 +60,23 @@ status`) directly in the main conversation. If it fails, stop and tell the
 user exactly what to fix. Do not proceed to Step 0.5 on broken config.
 
 **Step 0.5 — Ask which kind of work to do.**
-Once configuration is verified, ask via `AskUserQuestion` (exactly 4 discrete
-options — this is what that tool is for, unlike Step 2's entity list below):
+Once configuration is verified, ask which kind of work to do. Present it as a
+**plain-text numbered list in a normal message** — do not use the
+`AskUserQuestion` tool here, since it hard-caps at 4 options and there are
+now 5:
 
+```
+What would you like to do?
+1. General
+2. Recommendation Engine
+3. Default Dashboard
+4. Important Metrics Dashboard
+5. Transcript to Insights
+```
+
+- **General** — no fixed workflow: just an account and a free-text
+  statement of what to build, then charts created directly against that
+  account's real data to match it: skip straight to "General flow" below.
 - **Recommendation Engine** — the full insight-discovery workflow: proceed
   to Step 1 below.
 - **Default Dashboard** — the standardized onboarding dashboard every
@@ -79,6 +93,40 @@ options — this is what that tool is for, unlike Step 2's entity list below):
 - **Transcript to Insights** — turn a client meeting transcript into chart
   recommendations grounded in that account's real data: skip straight to
   "Transcript to Insights flow" below.
+
+### General flow
+
+No fixed sequence of steps — this flow exists for requests that don't fit
+the structured Recommendation Engine, the two standard dashboards, or a
+transcript. It still obeys every hard constraint above (Starrocks-only,
+`mb`-only, additive-only, never fabricate).
+
+1. Ask exactly: "Which Recruit CRM account would you like to work with?
+   Please provide the account number."
+2. Ask exactly: "What would you like to build?" Wait for a free-text
+   answer — a specific chart, metric, comparison, or anything else. Take
+   whatever they describe as the request; don't force it into an entity
+   choice or a recommendation count.
+3. Locate the account's data (see "Locating the account's data" below) and
+   discover only what's needed to fulfill the stated request — a scoped
+   pass over `prompts/discovery.md`'s method, not full multi-entity
+   discovery, unless the request itself spans multiple entities.
+4. Check the request against the data quality gate (`prompts/analysis.md`)
+   before building anything. If the requested chart can't be built
+   trustworthy on the actual data (missing field/table, too little or too
+   dirty data), say so plainly — per "Error handling" below — and ask how
+   the user wants to proceed instead of forcing something misleading.
+5. Check for existing duplicates (per "Avoiding duplicate charts") before
+   creating.
+6. Build and create the chart(s) per "Chart creation" below (GUI/MBQL
+   first, validate, `mb card create`, verify with `mb card get`). If the
+   request is ambiguous or could reasonably become more than one chart,
+   briefly state what you're about to build and confirm before creating; if
+   it's already unambiguous and singular, just build it and report back.
+   Cards live directly in the account's collection per "Where created
+   charts live" — no nested sub-collection, same convention as the
+   Recommendation Engine and Transcript to Insights flows.
+7. Log per "History log" below, with `"source": "general"` on its entries.
 
 ### Default Dashboard flow
 
@@ -324,10 +372,10 @@ numbers.
 **GUI (MBQL) first, always.** Every chart is built through Metabase's visual
 query builder (MBQL) by default. Only fall back to native SQL when the
 required logic genuinely cannot be expressed in MBQL (e.g. the stage-ordinal
-`CASE` ranking used to determine a candidate's current pipeline stage,
-window functions, or similarly complex computations) — and say explicitly
-why MBQL wasn't sufficient when this happens. See `prompts/chart-generation.md`
-for the full sequence.
+`CASE` ranking used to determine a candidate's maximum/farthest pipeline
+stage, window functions, or similarly complex computations) — and say
+explicitly why MBQL wasn't sufficient when this happens. See
+`prompts/chart-generation.md` for the full sequence.
 
 Only after recommendations are presented and explained:
 
@@ -364,15 +412,16 @@ inside a sub-collection named for the account number being analyzed.
    `mb collection create --body '{"name":"<account_number>","parent_id":199}'`.
 4. Never create a card outside this account-scoped collection.
 
-This is the Recommendation Engine flow's convention — the Transcript to
-Insights flow uses the same convention (individual cards directly in the
-account's collection). The Default Dashboard and Important Metrics
-Dashboard flows instead nest their cards one level deeper, each in their own
-sub-collection under the account's collection — "Default Dashboard Charts"
-(see "Default Dashboard flow" above and `scripts/create_default_dashboard.py`)
-or "Important Metrics Dashboard Charts" (see "Important Metrics Dashboard
-flow" above and `scripts/create_important_metrics_dashboard.py`) — each
-flow's dashboard still sits directly in the account's collection.
+This is the Recommendation Engine flow's convention — the General and
+Transcript to Insights flows use the same convention (individual cards
+directly in the account's collection). The Default Dashboard and Important
+Metrics Dashboard flows instead nest their cards one level deeper, each in
+their own sub-collection under the account's collection — "Default
+Dashboard Charts" (see "Default Dashboard flow" above and
+`scripts/create_default_dashboard.py`) or "Important Metrics Dashboard
+Charts" (see "Important Metrics Dashboard flow" above and
+`scripts/create_important_metrics_dashboard.py`) — each flow's dashboard
+still sits directly in the account's collection.
 
 ## History log
 
@@ -404,9 +453,10 @@ Append an entry at these points:
   {"timestamp": "2026-08-18T23:45:00Z", "type": "chart_created", "account": "662", "recommendation_rank": 1, "card_id": 70801, "name": "...", "chart_type": "bar", "collection_id": 24521}
   ```
   For entries from the Transcript to Insights flow, add `"source":
-  "transcript"` to both event types above (omit `source` — or use
-  `"source": "insight_discovery"` — for the Recommendation Engine flow) so
-  the two are distinguishable in `logs/history.jsonl`.
+  "transcript"`, and for the General flow add `"source": "general"`, to
+  both event types above (omit `source` — or use `"source":
+  "insight_discovery"` — for the Recommendation Engine flow) so all three
+  are distinguishable in `logs/history.jsonl`.
 - **After a Default Dashboard run** (`scripts/create_default_dashboard.py`
   appends this itself — see the script): one `default_dashboard_created` (or
   `_skipped` / `_failed`) entry.
@@ -464,17 +514,33 @@ itself. The row *content* differs; only the `id` repeats.
   linked to multiple records can appear more than once under the same
   `id`) — dedupe before counting.
 
-**Determining a candidate's current/furthest pipeline stage:** timestamps
-between consecutive stage changes are often only seconds apart, so
-`MAX(stage_date)` does **not** reliably identify the furthest-progressed
-stage. Instead, rank stages by their actual business/funnel order (discover
-this account's real `hiring_stage` values first — never reuse another
-account's stage list) with a `CASE` expression assigning each stage an
-ordinal, giving any unrecognized value a large fallback ordinal (e.g. 100),
-then take the row with `MAX(ordinal)` per candidate-job pair as the current
-stage. Example shape (values are illustrative — rebuild the mapping from
-this account's discovered stages, in the order they actually represent
-funnel progression):
+**"Latest hiring stage" vs. "maximum/farthest hiring stage" — two distinct
+questions, never conflate them.** For the same candidate-job pair these can
+give different answers (e.g. a candidate reached "Shortlisted", was
+rejected, then re-applied and is now back at "Applied" — the latest stage is
+"Applied" but the maximum stage reached is still "Shortlisted"). If a
+request just says "current stage" ambiguously, ask which of the two is
+meant rather than guessing.
+
+- **Latest hiring stage** — whichever stage the candidate-job pair is in
+  most recently in time, taken purely from the `hiring_stage` value itself
+  (the row with `MAX(stage_date)`, or the most recent row by insertion
+  order if dates tie) — **no funnel-order `CASE` ranking involved.** Use
+  this whenever the request is phrased as "latest"/"most recent"/"current as
+  of now" hiring stage.
+- **Maximum/farthest hiring stage** — the furthest a candidate-job pair has
+  ever progressed through the funnel, regardless of recency. Timestamps
+  between consecutive stage changes are often only seconds apart, so
+  `MAX(stage_date)` does **not** reliably identify this — instead rank
+  stages by their actual business/funnel order (discover this account's
+  real `hiring_stage` values first — never reuse another account's stage
+  list) with a `CASE` expression assigning each stage an ordinal, giving any
+  unrecognized value a large fallback ordinal (e.g. 100), then take the row
+  with `MAX(ordinal)` per candidate-job pair. Use this whenever the request
+  is phrased as "farthest"/"furthest"/"maximum"/"highest progressed" hiring
+  stage. Example shape (values are illustrative — rebuild the mapping from
+  this account's discovered stages, in the order they actually represent
+  funnel progression):
 
 ```
 CASE
@@ -487,8 +553,9 @@ CASE
 END
 ```
 
-Apply this whenever a query needs "the candidate's current stage" — never
-apply it blindly with another account's exact stage names.
+Apply this whenever a query needs the candidate's **maximum/farthest**
+stage — never apply it when "latest" is what's actually meant (see above),
+and never apply it blindly with another account's exact stage names.
 
 ## Error handling — exact wording
 

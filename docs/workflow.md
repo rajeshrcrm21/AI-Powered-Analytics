@@ -10,6 +10,8 @@ reading it rather than for Claude executing it.
    If nothing is configured, it will tell you exactly what to run — see
    README.md.
 4. Claude asks which kind of work you want:
+   - **General** — no fixed workflow: just an account and a free-text
+     description of what to build (see "General flow" below).
    - **Recommendation Engine** — the full insight-discovery flow (steps 5-11
      below).
    - **Default Dashboard** — the standardized onboarding dashboard every
@@ -21,6 +23,25 @@ reading it rather than for Claude executing it.
    - **Transcript to Insights** — turn a client meeting transcript into
      chart recommendations grounded in that account's real data (see
      "Transcript to Insights flow" below).
+
+## General flow
+
+1. Claude asks: **"Which Recruit CRM account would you like to work with?
+   Please provide the account number."**
+2. Claude asks: **"What would you like to build?"** — reply with whatever
+   you have in mind: a specific chart, a metric, a comparison, anything.
+   There's no entity-choice prompt and no recommendation count here.
+3. Claude discovers only the data needed to fulfill your request (a scoped
+   version of the same discovery method the Recommendation Engine flow
+   uses), checks it against the same data-quality gate and duplicate-chart
+   check as every other flow, and either builds it or tells you plainly why
+   it can't.
+4. If your request is unambiguous and clearly one chart, Claude just builds
+   it and reports back. If it's ambiguous or could reasonably become more
+   than one chart, Claude states what it's about to build and confirms
+   first. Either way, the chart lands directly in the account's "Data Team
+   WIP" sub-collection — same convention as the Recommendation Engine and
+   Transcript to Insights flows.
 
 ## Recommendation Engine flow
 
@@ -109,6 +130,6 @@ reading it rather than for Claude executing it.
 If at any point the account can't be found, the data is too thin/dirty for a
 given analysis, or Metabase can't be reached, Claude will say so directly
 rather than inventing results. Every flow appends an entry to the local,
-git-ignored `logs/history.jsonl` audit trail; for the Recommendation Engine
-and Transcript to Insights flows this is enforced by a Claude Code hook that
-flags the session if a card/dashboard was created but never logged.
+git-ignored `logs/history.jsonl` audit trail; for the General, Recommendation
+Engine, and Transcript to Insights flows this is enforced by a Claude Code
+hook that flags the session if a card/dashboard was created but never logged.
