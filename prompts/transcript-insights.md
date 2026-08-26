@@ -46,7 +46,12 @@ For each extracted requirement:
    implies — same rigor as the Recommendation Engine flow, not a shortcut.
 2. Check whether the account's actual tables/fields can support the request
    (per CLAUDE.md's data model rules — duplicate-ID handling, current-stage
-   determination, etc. all still apply here).
+   determination, etc. all still apply here). **Before matching a business
+   term to a field by name/type similarity, re-read the transcript for an
+   explicit statement of the mapping** (per CLAUDE.md "Data discovery") — a
+   speaker naming the actual Recruit CRM field ("that's called X on our
+   system") overrides whatever field merely sounds like the best semantic
+   fit or has the cleanest data.
 3. If the data supports it, build the chart candidate the same way
    `prompts/analysis.md` treats a candidate insight — grounded in a real
    query, not a guess at what the numbers probably look like.

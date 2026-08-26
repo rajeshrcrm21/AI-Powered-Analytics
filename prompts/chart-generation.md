@@ -81,6 +81,10 @@ move to the next-ranked recommendation instead of forcing a broken chart.
 - Never create more cards than the user confirmed.
 - Never invent field names — if unsure a field exists, re-check with
   `mb table fields <id>` rather than guessing.
+- When the source material (user message, transcript, shared sheet) names
+  the specific field a business term maps to, use that field — don't
+  substitute a same-sounding field picked by name/type matching or data
+  completeness instead (see CLAUDE.md "Data discovery").
 - Don't duplicate an existing card/dashboard (re-check per CLAUDE.md
   "Avoiding duplicate charts") unless justified, and say why.
 - Never delete, archive, or modify a pre-existing card, dashboard, or

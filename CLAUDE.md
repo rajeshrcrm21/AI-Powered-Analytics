@@ -323,6 +323,19 @@ For each entity worth analyzing, understand record counts, key dimensions
 (status, stage, owner/recruiter, dates), key measures, and relationships
 (foreign keys) before treating anything as a metric candidate.
 
+**When the user, a transcript, or any other source material explicitly
+states which Recruit CRM field a business term maps to, that stated mapping
+is authoritative — never substitute a different, same-sounding field chosen
+by name or type matching instead.** For example, if a client says on a call
+"our Minimum Annual Package is what you call Budget Allocated," use
+`budget_allocated`, not a differently-named field like `annual_salary_min`
+that merely *sounds* like a semantic match or happens to have cleaner/more
+complete data. Before picking a field for a business term, re-read the
+source material for an explicit statement of the mapping; only fall back to
+inferring one from field names/types/data completeness when the source
+genuinely doesn't say. If multiple fields are still plausible after that,
+ask rather than guess.
+
 ## Data quality gate
 
 Before any insight is proposed as a recommendation, check it against
