@@ -43,17 +43,19 @@ For each extracted requirement:
 
 1. Locate the account (see CLAUDE.md "Locating the account's data") and run
    discovery per `prompts/discovery.md` against the entities the requirement
-   implies — same rigor as the Recommendation Engine flow, not a shortcut.
+   implies — in full, not a shortcut.
 2. Check whether the account's actual tables/fields can support the request
    (per CLAUDE.md's data model rules — duplicate-ID handling, current-stage
    determination, etc. all still apply here).
-3. If the data supports it, build the chart candidate the same way
-   `prompts/analysis.md` treats a candidate insight — grounded in a real
-   query, not a guess at what the numbers probably look like.
-4. If the account's data **cannot** support a requirement (missing
-   table/field, or the concept doesn't exist for this account), do not
-   fabricate or approximate it. Say so explicitly and specifically (which
-   requirement, why it can't be built) instead of silently dropping it.
+3. If the data supports it, build the chart candidate on a real, validated
+   query (per `prompts/chart-generation.md`'s validation step) — never a
+   guess at what the numbers probably look like.
+4. If the account's data **cannot** support a requirement — missing
+   table/field, the concept doesn't exist for this account, or an assumption
+   the requirement's definition rests on doesn't hold in the real data —
+   follow `prompts/infeasible-requirement.md`: confirm the finding with the
+   user first, then draft a customer-ready explanation. Do not fabricate or
+   approximate it, and do not silently drop it.
 
 Before finalizing, check for duplicates the same way as CLAUDE.md's
 "Avoiding duplicate charts" — a request that matches something that already
@@ -127,18 +129,18 @@ them and get an answer first — don't build on the default/assumed
 interpretation without confirming it. Build and verify each exactly per
 `prompts/chart-generation.md`.
 
-Cards land under "Data Team WIP" using the same account-collection
-convention as the Recommendation Engine flow (CLAUDE.md "Where created
-charts live") — individual cards directly in the account's collection, not a
-sub-collection, and **not** assembled into a dashboard. Dashboard assembly
-for this flow is future scope.
+Cards land under "Data Team WIP" using the account-collection convention
+described in CLAUDE.md "Where created charts live" — individual cards
+directly in the account's collection, not a sub-collection, and **not**
+assembled into a dashboard. Dashboard assembly for this flow is future
+scope.
 
 ## Logging
 
 Log per CLAUDE.md "History log" — a `recommendations_presented` entry after
 presenting the numbered list, and one `chart_created` entry per card
 actually created. Add `"source": "transcript"` to both so they're
-distinguishable from Recommendation Engine entries in `logs/history.jsonl`.
+distinguishable from Requirements Intake entries in `logs/history.jsonl`.
 In the `recommendations` array, use `"client_ask"` in place of `"insight"`
 (this flow has no `insight` field) — otherwise the same shape as CLAUDE.md's
 example.

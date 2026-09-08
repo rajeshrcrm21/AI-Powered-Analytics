@@ -1,14 +1,14 @@
 # Analysis configuration
 
-Defaults and knobs for the recommendation engine. Adjust here rather than in
+Defaults and knobs shared by this project's chart-building flows
+(Requirements Intake, Transcript to Insights). Adjust here rather than in
 CLAUDE.md if these need to change per-deployment.
 
-## Defaults
+## Data quality defaults (CLAUDE.md "Data quality gate")
 
-- Default recommendation count if the user ever just says "some": 5
 - Minimum record count to trust a distribution/trend as meaningful: judge in
   context, but treat anything under ~20 records as "too small to trust" for
-  that specific slice, and say so rather than silently recommending it.
+  that specific slice, and say so rather than silently building the chart.
 - Minimum history to call something a "trend": at least a few periods of the
   chosen granularity (e.g., 3+ months for a monthly trend) — a single data
   point is a fact, not a trend.
@@ -21,16 +21,6 @@ Job Statuses, Candidate Statuses/Stages.
 
 Never assume all of these exist for a given account — confirm via
 `prompts/discovery.md` first.
-
-## Ranking weights (relative priority, not a strict formula)
-
-1. Business impact
-2. Strength of observed pattern
-3. Actionability
-4. Data reliability
-5. Relevance to recruitment operations
-6. Uniqueness vs. existing Metabase content
-7. Clarity of communication
 
 ## Chart type defaults by insight shape
 

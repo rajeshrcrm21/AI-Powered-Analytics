@@ -12,43 +12,29 @@ Claude (this conversation, in VS Code)
 mb auth list / status        (verify Metabase CLI config)
   |
   v
-Ask which kind of work: Recommendation Engine / Default Dashboard /
-                         Transcript to Insights
+Ask which kind of work: Requirements Intake / Transcript to Insights
   |
-  +-- Recommendation Engine -----------------------------------------+
-  |     Ask account -> ask entity/focus scope -> ask rec. count      |
-  |       |                                                          |
-  |       v                                                          |
-  |     mb database / table / field  (discover the account's data,  |
-  |                                    scoped to the chosen entity)  |
-  |       |                                                          |
-  |       v                                                          |
-  |     mb query   (analyze real data - funnels, trends, cohorts)    |
-  |       |                                                          |
-  |       v                                                          |
-  |     Claude ranks & explains insights, checks data-quality gate   |
-  |       |                                                          |
-  |       v                                                          |
-  |     mb search  (check for existing/duplicate charts)             |
-  |       |                                                          |
-  |       v                                                          |
-  |     mb card create / get  (create + verify confirmed charts,     |
-  |                             under "Data Team WIP" > <account>)   |
-  +--------------------------------------------------------------------+
+  +-- Requirements Intake (primary flow) --------------------------------+
+  |     Ask account -> ask for requirements directly (list / doc)        |
+  |       |                                                              |
+  |       v                                                              |
+  |     Resolve each requirement: references/canonical-patterns.md ->    |
+  |     references/schema-map.md / metric-glossary.md -> live discovery  |
+  |     (mb database / table / field - metadata only, never row values)  |
+  |       |                                                              |
+  |       v                                                              |
+  |     Ask a clarifying question only when genuinely ambiguous          |
+  |     (never by querying live data to check)                           |
+  |       |                                                              |
+  |       v                                                              |
+  |     mb search  (check for existing/duplicate charts, name-level only)|
+  |       |                                                              |
+  |       v                                                              |
+  |     Present numbered list -> confirm -> mb card create / get         |
+  |     (individual cards, "Data Team WIP" > <account>, no dashboard)    |
+  +------------------------------------------------------------------------+
   |
-  +-- Default Dashboard -----------------------------------------------+
-  |     Ask account number                                            |
-  |       |                                                            |
-  |       v                                                            |
-  |     scripts/create_default_dashboard.py --profile <p> --account <n>|
-  |       (discovers the account's tables via mb, builds the same      |
-  |        fixed set of charts every account gets, skips any chart     |
-  |        whose entity doesn't exist for this account, dry-run        |
-  |        validates every query before creating it - additive-only,  |
-  |        stops rather than touching an existing default dashboard)   |
-  +--------------------------------------------------------------------+
-  |
-  +-- Transcript to Insights -------------------------------------------+
+  +-- Transcript to Insights ---------------------------------------------+
         Ask account number -> ask for the pasted transcript
           |
           v
@@ -57,7 +43,7 @@ Ask which kind of work: Recommendation Engine / Default Dashboard /
           |
           v
         Ground each requirement in the account's real discovered data
-        (same discovery/analysis rigor as the Recommendation Engine flow)
+        (the same metadata-only discovery as Requirements Intake)
           |
           v
         Present a numbered list of buildable charts, citing what in the
@@ -66,19 +52,16 @@ Ask which kind of work: Recommendation Engine / Default Dashboard /
           v
         mb card create / get  (individual cards, "Data Team WIP" >
                                 <account>, no dashboard assembly)
-  +--------------------------------------------------------------------+
+  +------------------------------------------------------------------------+
   |
   v
 Every flow appends to logs/history.jsonl (local-only, git-ignored) and
 results are returned to the user in the terminal.
 ```
 
-A `.claude/settings.json` hook enforces the history-log step for the two
-flows that create cards/dashboards directly in the conversation: it flags
-(via a `Stop` hook) if `mb card create` / `mb dashboard create` ran but
-`logs/history.jsonl` was never appended to before the session ends. The
-Default Dashboard script logs itself in code instead (see
-`scripts/create_default_dashboard.py`).
+A `.claude/settings.json` hook enforces the history-log step: it flags (via
+a `Stop` hook) if `mb card create` / `mb dashboard create` ran but
+`logs/history.jsonl` was never appended to before the session ends.
 
 ## What does not exist here
 
@@ -86,8 +69,7 @@ Default Dashboard script logs itself in code instead (see
 - No database is created or connected to directly by this project.
 - No browser automation.
 - The only "runtime" is this conversation plus the `mb` CLI subprocess calls
-  Claude (or `scripts/create_default_dashboard.py`) makes on the user's
-  behalf.
+  Claude makes on the user's behalf.
 
 ## Why Metabase CLI, not direct DB access
 
@@ -114,21 +96,21 @@ never `MAX(stage_date)`).
 ## Files
 
 - `CLAUDE.md` — persistent operating instructions (read first, every time),
-  including the three-flow branch, the data-model standing knowledge, and
-  the history-log requirements
+  including the two-flow branch, the data-model standing knowledge, and the
+  history-log requirements
 - `prompts/` — the workflow-stage prompts referenced from CLAUDE.md:
-  `discovery.md`, `analysis.md`, `recommendation.md`, `chart-generation.md`
-  (Recommendation Engine flow) and `transcript-insights.md` (Transcript to
-  Insights flow)
-- `config/analysis-config.md` — tunable defaults/weights
+  `discovery.md` and `chart-generation.md` (shared by both flows),
+  `requirements-intake.md` (Requirements Intake flow),
+  `transcript-insights.md` (Transcript to Insights flow), and
+  `infeasible-requirement.md` (shared handling for a requirement the data
+  can't support)
+- `references/` — `schema-map.md` (structural, metadata-only map of the core
+  tables) and `metric-glossary.md` (business-term definitions confirmed by
+  the user, per account) — checked before falling back to live discovery
+- `config/analysis-config.md` — tunable defaults (data-quality thresholds,
+  chart-type defaults)
 - `docs/workflow.md` — the same flows, written for a human teammate
 - `scripts/mb-login.sh` — thin helper that reads `.env` and calls
   `mb auth login`
-- `scripts/create_default_dashboard.py` — automates the Default Dashboard
-  flow end-to-end (discovery, chart/dashboard creation, logging); see its
-  own docstring for the full behavior and guardrails
-- `scripts/default_dashboard_template.json` — the fixed set of charts the
-  Default Dashboard flow replicates onto each account's own data
 - `logs/history.jsonl` — local-only, git-ignored audit trail of what was
   analyzed/recommended/created; enforced by hooks in `.claude/settings.json`
-  for the Recommendation Engine and Transcript to Insights flows

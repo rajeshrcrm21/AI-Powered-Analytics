@@ -5,8 +5,9 @@ using only fields that were actually discovered — never assumed schema.
 
 ## Sequence (do not skip steps)
 
-1. Analysis and recommendation are already done (`prompts/analysis.md`,
-   `prompts/recommendation.md`).
+1. The candidate chart(s) have already been presented and explained — see
+   `prompts/requirements-intake.md` or `prompts/transcript-insights.md`,
+   whichever flow is active.
 2. **Ask for confirmation** on which recommendation(s) to actually create,
    unless the user already said "create all of them" or similar.
 3. Build the query:
@@ -16,7 +17,16 @@ using only fields that were actually discovered — never assumed schema.
      genuinely cannot be expressed in MBQL (e.g. the stage-ordinal `CASE`
      ranking from CLAUDE.md's "current pipeline stage" rule, window
      functions, or other computations the GUI builder can't represent). If
-     you fall back to SQL, state explicitly why MBQL wasn't sufficient.
+     you fall back to SQL, state explicitly why MBQL wasn't sufficient, and
+     save it as a Model first rather than a one-off raw-SQL question — build
+     the actual chart on top of the Model in the GUI (see CLAUDE.md "Chart
+     creation" for when a Model is/isn't worth it vs. clutter).
+   - **A stage-to-stage conversion ratio (e.g. 2nd Interview → Final
+     Interview) is not a naive `COUNT(B)/COUNT(A)`** — build it as the
+     double summarization in CLAUDE.md's "Stage-to-stage conversion ratios"
+     (one row per id per stage reached → filter to the earlier stage's ids →
+     summarize again for the later stage among just those). This is usually
+     buildable in the GUI as two chained summarize steps, no SQL needed.
    - Use only tables/fields confirmed to exist during discovery.
    - **Validate before creating — native SQL needs *more* rigor than MBQL,
      not less**, since it bypasses the query builder's structural guardrails
@@ -33,6 +43,17 @@ using only fields that were actually discovered — never assumed schema.
         a sane column count and row shape for what the chart needs) before
         creating the card. Never create a native-SQL card off a dry-run
         alone.
+     3. **This run is the one and only point in the entire workflow that
+        touches real row data.** Discovery and resolution (`prompts/
+        discovery.md`, `prompts/requirements-intake.md`) never sample field
+        values or run exploratory queries — they work from schema metadata
+        and user-confirmed definitions only. So this is also where a
+        definitional assumption that doesn't hold (e.g. an "at-risk deals"
+        requirement built on a "Lost" stage this account has none of) or an
+        unrecognized category literal actually surfaces — empty results or
+        an error here, not a separate live check run earlier. If that
+        happens, stop and follow `prompts/infeasible-requirement.md` instead
+        of forcing the card through.
 4. Choose the visualization (load the `visualization` skill for `display`
    and `visualization_settings` conventions):
    - Match chart type to the insight and data shape (see `Chart Type` chosen
