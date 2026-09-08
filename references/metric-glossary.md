@@ -73,50 +73,6 @@ with no priors, rather than checking the data — or existing content — itself
    confirmed mapping here once you answer, so the same mismatch doesn't get
    re-asked next time.
 
-## Account 53181 — confirmed
-
-**Hiring stage list & funnel order** (`assign_job_candidate_53181.hiring_stage`),
-confirmed by the user 2026-09-07 — never re-ask, never reuse for another
-account:
-
-1. Applied
-2. Assigned
-3. 1-st approach
-4. 2-nd approach
-5. 3-rd approach
-6. Follow Up Later
-7. Send to the client
-8. Declined the opportunity
-9. NO
-10. Candidate think it over
-11. Sent Contact Info
-12. Phone Screen Interview
-13. 1-st Interview
-14. 2-nd Interview
-15. 3-rd Interview
-16. 4-th Interview
-17. Assignment Task
-18. HR Interview
-19. Recommendations
-20. Offered
-21. Rejected by Talentedge
-22. Already Known
-23. Rejected by Client-based on CV only
-24. Rejected by Client-Skill Mismatch
-25. Rejected by Client-Cultural Misfit
-26. Rejected by Client-Overpriced Expectations
-27. Candidate - Withdraw Candidacy
-28. Candidate - Unresponsive
-29. Sample
-30. On Hold
-31. Internal Review
-32. Position Closed Before Presentation to
-33. Client's List
-34. Placed
-
-Implemented as a reusable Model: card **#73857** "Current Hiring Stage
-(Assign Job Candidate) - 53181" (native SQL, `stage_rank = 1` = current
-stage per candidate-job pair) in collection 26600.
 
 **Term mappings (this account only):**
 - "Sent to the client" / "Send to the client" → `hiring_stage = 'Send to the client'` (exact literal, stage 7)
@@ -125,26 +81,6 @@ stage per candidate-job pair) in collection 26600.
 - "Open positions" → `job_status_label = 'Open'`
 - "User who set the status" (on `assign_job_candidate_53181`) → `updated_by` (not `assigned_by`)
 - "The manager" (in "positions not owned by the manager") → the candidate's owner field (`candidate_owner_name`); "not owned by the manager" = `job_owner_name <> candidate_owner_name` (position owner differs from the candidate's owner)
-
-## Account 28516 — confirmed
-
-**Term mappings (this account only)**, confirmed by the user 2026-09-07 —
-never re-ask, never reuse for another account:
-
-- "Filled/Placement" job (a job that resulted in a placement) →
-  `assign_job_candidate_28516.job_status_label = 'Filled/Placement'` — a
-  single literal value (not two separate "Filled" and "Placement" values).
-  Confirmed by the user 2026-09-08 after two prior guesses ("Filled"/
-  "Placement" separately, then "Filled/Placemend") both returned 0 matching
-  rows.
-- "Open jobs" → `job_status_label = 'Open'`.
-- "RECRUIT - Interview Stage" (deal stage) →
-  `deals_28516.deal_stage = 'RECRUIT - Interview Stage'` (exact spelling as
-  given by the user).
-- "Won" deal → `deals_28516.deal_stage = 'Won'`.
-- "Who made the call" (for call-volume-by-team-member requirements) →
-  `call_logs_28516.call_from_name` (not `created_by_id` or any `*_owner_id`
-  field). Measured by `created_on` (when logged), not `started_on`.
 
 ## How to answer
 

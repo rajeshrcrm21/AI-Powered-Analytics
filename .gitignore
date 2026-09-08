@@ -19,3 +19,5 @@ logs/
 
 # History-log-enforcement hook state (ephemeral per-session counter)
 .claude/.history-log-pending
+
+internal_view.md
