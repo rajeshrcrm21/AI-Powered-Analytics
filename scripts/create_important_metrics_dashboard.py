@@ -17,11 +17,26 @@ then torn down. If an "Important Metrics Dashboard" already exists for the
 account, the script stops rather than touching it (see
 check_existing_dashboard).
 
-Every card this script creates lives in an "Important Metrics Dashboard
-Charts" sub-collection under the account's own collection (see
-resolve_charts_collection) - the dashboard itself sits directly in the
-account collection, one level up, mirroring the Default Dashboard flow's
-"Default Dashboard Charts" convention (see create_default_dashboard.py).
+This flow always saves into the account's own collection (see CLAUDE.md
+"Where created charts live" - Convention B), never "Data Team WIP" - a
+genuine top-level collection (never nested under collection 199), named
+"Shared Collection <account>" by default, though some accounts already
+have one under a different, custom name (see resolve_account_own_collection).
+This script never creates or touches that parent collection itself - if no
+matching top-level collection exists for the account, it stops rather than
+creating one or falling back to "Data Team WIP". Once found, that
+collection mandatorily gets three sub-collections - Cards, Models,
+Drill-downs (see ensure_structural_subcollections) - created if missing,
+without touching anything already sitting directly in the account's
+collection. Every card this script creates lives in an "Important Metrics
+Dashboard Cards" sub-collection under Cards (see
+resolve_dashboard_cards_collection), mirroring the Default Dashboard
+flow's convention (see create_default_dashboard.py); the dashboard itself
+is created directly in the account's own collection and pinned there
+(`collection_position`). If an "Important Metrics Dashboard" already exists
+for this account under the old "Data Team WIP" convention (from before this
+flow switched to the account's own collection), the script stops rather
+than creating a second copy elsewhere (see check_legacy_dashboard).
 
 Unlike the Default Dashboard's cards, several of this dashboard's cards
 reference more than one entity (e.g. a job/assignment join for ratio cards),
@@ -49,9 +64,14 @@ from zoneinfo import ZoneInfo
 
 TEMPLATE_PATH = Path(__file__).parent / "important_metrics_dashboard_template.json"
 LOG_PATH = Path(__file__).parent.parent / "logs" / "history.jsonl"
-PARENT_COLLECTION_ID = 199  # "Data Team WIP" - see CLAUDE.md
+LEGACY_PARENT_COLLECTION_ID = 199  # "Data Team WIP" - see CLAUDE.md; only
+# consulted here to check for a pre-existing dashboard from before this flow
+# switched to the account's own collection (see check_legacy_dashboard).
 DASHBOARD_NAME = "Important Metrics Dashboard"
-CHARTS_COLLECTION_NAME = "Important Metrics Dashboard Charts"
+CARDS_SUBCOLLECTION_NAME = f"{DASHBOARD_NAME} Cards"
+STRUCTURAL_SUBCOLLECTIONS = ("Cards", "Models", "Drill-downs")  # mandatory
+# under the account's own collection - see CLAUDE.md "Where created charts
+# live" (Convention B).
 IST = ZoneInfo("Asia/Kolkata")
 
 
@@ -365,15 +385,72 @@ def resolve_child_collection(profile, parent_id, name):
     return created["id"], True
 
 
-def resolve_account_collection(profile, account):
-    return resolve_child_collection(profile, PARENT_COLLECTION_ID, account)
+def resolve_account_own_collection(profile, account):
+    """Find this account's own client-facing collection - a genuine
+    top-level collection (parent_id null, never nested under "Data Team
+    WIP") named "Shared Collection <account>" by default, though some
+    accounts already have one under a different, custom name (see
+    CLAUDE.md "Where created charts live" - Convention B). `mb collection
+    tree` returns a flat list of every top-level collection (each carrying
+    its own nested `children`) - matched here by the account number
+    appearing in one of *those* top-level names, never by descending into
+    any collection's children (that would also catch "Data Team WIP"
+    sub-collections sharing the same number, which are a different
+    convention). This project never creates this parent collection itself -
+    returns (None, None) if nothing matches, and the caller must stop."""
+    tree = mb(profile, "collection", "tree")
+    if not isinstance(tree, list):
+        tree = [tree]
+    matches = [c for c in tree if account in c["name"]]
+    if not matches:
+        return None, None
+    if len(matches) > 1:
+        print(f"  Multiple top-level collections match account {account}:")
+        for c in matches:
+            print(f"    {c['id']}: {c['name']!r}")
+        chosen = input("  Which collection id is this account's own collection? ").strip()
+        for c in matches:
+            if str(c["id"]) == chosen:
+                return c["id"], c["name"]
+        print(f"  '{chosen}' doesn't match any of the listed collection ids.")
+        sys.exit(1)
+    return matches[0]["id"], matches[0]["name"]
 
 
-def resolve_charts_collection(profile, account_collection_id):
-    """All cards this script creates live in an 'Important Metrics
-    Dashboard Charts' sub-collection under the account's collection - only
-    the dashboard itself sits directly in the account collection."""
-    return resolve_child_collection(profile, account_collection_id, CHARTS_COLLECTION_NAME)
+def ensure_structural_subcollections(profile, parent_id):
+    """Ensure the account's own collection has its three mandatory
+    sub-collections - Cards, Models, Drill-downs (see CLAUDE.md "Where
+    created charts live" - Convention B) - creating whichever are missing.
+    Never touches anything else already sitting in the parent collection."""
+    return {name: resolve_child_collection(profile, parent_id, name)[0] for name in STRUCTURAL_SUBCOLLECTIONS}
+
+
+def resolve_dashboard_cards_collection(profile, cards_collection_id):
+    """This run's cards live in an 'Important Metrics Dashboard Cards'
+    sub-collection under the account's own collection's Cards folder."""
+    return resolve_child_collection(profile, cards_collection_id, CARDS_SUBCOLLECTION_NAME)
+
+
+def check_legacy_dashboard(profile, account):
+    """Look for an 'Important Metrics Dashboard' already sitting in this
+    account's old 'Data Team WIP' sub-collection, from before this flow
+    switched to the account's own collection (see CLAUDE.md "Where created
+    charts live" - "Avoiding a duplicate across the two conventions").
+    Returns (dashboard_id, collection_id), or (None, None) if there isn't
+    one."""
+    tree = mb(profile, "collection", "tree")
+    root = tree[0] if isinstance(tree, list) else tree
+    wip_node = find_collection_node(root, LEGACY_PARENT_COLLECTION_ID)
+    if wip_node is None:
+        return None, None
+    for child in wip_node.get("children", []):
+        if child["name"].strip() == account:
+            legacy_collection_id = child["id"]
+            results = mb(profile, "search", DASHBOARD_NAME, "--models", "dashboard", "--limit", "50")
+            for item in results.get("data", []):
+                if item.get("collection_id") == legacy_collection_id and item.get("name") == DASHBOARD_NAME:
+                    return item["id"], legacy_collection_id
+    return None, None
 
 
 def check_existing_dashboard(profile, account_collection_id):
@@ -414,19 +491,41 @@ def main():
         log_event("important_metrics_dashboard_failed", account=account, reason=reason, profile=profile)
         sys.exit(1)
 
-    print(f"\nResolving destination collection under 'Data Team WIP' (id {PARENT_COLLECTION_ID})...")
-    account_collection_id, created = resolve_account_collection(profile, account)
-    print(f"  collection {account_collection_id} ({'created' if created else 'existing'})")
+    print(f"\nResolving account {account}'s own collection...")
+    account_collection_id, account_collection_name = resolve_account_own_collection(profile, account)
+    if account_collection_id is None:
+        print(f"\nNo existing top-level account collection found for account {account} (looked for the "
+              f"account number in a genuine top-level collection's name, e.g. 'Shared Collection {account}', "
+              "outside 'Data Team WIP'). This project never creates that parent collection itself - it needs "
+              "to exist first. Please create it (or tell me its existing name/id) and re-run.")
+        log_event("important_metrics_dashboard_failed", account=account, collection_mode="account_collection",
+                  reason="no existing top-level account collection found", profile=profile)
+        sys.exit(1)
+    print(f"  collection {account_collection_id} ({account_collection_name!r})")
 
-    charts_collection_id, charts_created = resolve_charts_collection(profile, account_collection_id)
-    print(f"  '{CHARTS_COLLECTION_NAME}' collection {charts_collection_id} ({'created' if charts_created else 'existing'})")
+    legacy_dashboard_id, legacy_collection_id = check_legacy_dashboard(profile, account)
+    if legacy_dashboard_id:
+        print(f"\nA '{DASHBOARD_NAME}' (id {legacy_dashboard_id}) already exists in this account's old "
+              f"'Data Team WIP' collection (id {legacy_collection_id}), from before this flow switched to "
+              "the account's own collection. Stopping rather than creating a second copy elsewhere.")
+        log_event("important_metrics_dashboard_skipped", account=account, collection_mode="account_collection",
+                  dashboard_id=legacy_dashboard_id, collection_id=legacy_collection_id,
+                  reason=f"{DASHBOARD_NAME} already exists in legacy Data Team WIP collection", profile=profile)
+        sys.exit(1)
+
+    structural = ensure_structural_subcollections(profile, account_collection_id)
+    print(f"  Cards {structural['Cards']}, Models {structural['Models']}, Drill-downs {structural['Drill-downs']}")
+
+    cards_collection_id, cards_created = resolve_dashboard_cards_collection(profile, structural["Cards"])
+    print(f"  '{CARDS_SUBCOLLECTION_NAME}' collection {cards_collection_id} ({'created' if cards_created else 'existing'})")
 
     existing = check_existing_dashboard(profile, account_collection_id)
     if existing:
         print(f"\nA '{DASHBOARD_NAME}' (id {existing}) already exists in this account's collection. "
               "Stopping rather than creating a duplicate.")
-        log_event("important_metrics_dashboard_skipped", account=account, dashboard_id=existing,
-                  collection_id=account_collection_id, reason=f"{DASHBOARD_NAME} already exists", profile=profile)
+        log_event("important_metrics_dashboard_skipped", account=account, collection_mode="account_collection",
+                  dashboard_id=existing, collection_id=account_collection_id,
+                  reason=f"{DASHBOARD_NAME} already exists", profile=profile)
         sys.exit(1)
 
     print(f"\nCreating cards ({len(template['cards'])} in template)...")
@@ -457,7 +556,7 @@ def main():
             "display": card["display"],
             "dataset_query": query,
             "visualization_settings": card["visualization_settings"],
-            "collection_id": charts_collection_id,
+            "collection_id": cards_collection_id,
         }
         result = mb_body(profile, "card", "create", body=body)
         created_cards[card["key"]] = {
@@ -470,7 +569,7 @@ def main():
 
     if not created_cards:
         print("\nNo cards could be created for this account. Nothing to assemble into a dashboard.")
-        log_event("important_metrics_dashboard_failed", account=account,
+        log_event("important_metrics_dashboard_failed", account=account, collection_mode="account_collection",
                   reason="no cards could be created", cards_skipped=[{"name": n, "reason": r} for n, r in skipped],
                   profile=profile)
         sys.exit(1)
@@ -509,6 +608,7 @@ def main():
     dashboard_body = {
         "name": DASHBOARD_NAME,
         "collection_id": account_collection_id,
+        "collection_position": 1,  # pinned - see CLAUDE.md "Where created charts live"
         "tabs": [{"id": tab_ids[name], "name": name, "position": i} for i, name in enumerate(tabs_present)],
         "dashcards": dashcards,
         "parameters": parameters,
@@ -523,8 +623,8 @@ def main():
     assert verify["id"] == dashboard_id
 
     print(f"\nDone. '{DASHBOARD_NAME}' (id {dashboard_id}) for account {account}:")
-    print(f"  {len(created_cards)} cards created in '{CHARTS_COLLECTION_NAME}' (collection {charts_collection_id}), "
-          f"{len(skipped)} skipped, dashboard in collection {account_collection_id}")
+    print(f"  {len(created_cards)} cards created in '{CARDS_SUBCOLLECTION_NAME}' (collection {cards_collection_id}), "
+          f"{len(skipped)} skipped, dashboard pinned in collection {account_collection_id} ({account_collection_name!r})")
     if skipped:
         print("  Skipped:")
         for name, reason in skipped:
@@ -534,9 +634,13 @@ def main():
     log_event(
         "important_metrics_dashboard_created",
         account=account,
+        collection_mode="account_collection",
         dashboard_id=dashboard_id,
         collection_id=account_collection_id,
-        charts_collection_id=charts_collection_id,
+        cards_collection_id=structural["Cards"],
+        models_collection_id=structural["Models"],
+        drilldowns_collection_id=structural["Drill-downs"],
+        charts_collection_id=cards_collection_id,
         cards_created=len(created_cards),
         cards_skipped=[{"name": n, "reason": r} for n, r in skipped],
         profile=profile,

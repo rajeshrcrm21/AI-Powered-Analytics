@@ -1,11 +1,16 @@
 # AI-Powered Advanced Analytics Recommendation Engine
 
-A terminal-first workflow — no web UI, no backend, no database of its own —
-that uses Claude + the Metabase CLI (`mb`) to analyze a Recruit CRM
-customer's actual analytics data and recommend high-value charts/dashboards.
+A workflow driven entirely by talking to Claude directly in VS Code — no web
+UI, no backend, no database of its own — that uses Claude + the Metabase CLI
+(`mb`) to build professional, well-optimized charts and dashboards (with
+custom drill-downs and other Metabase-native features) against a Recruit CRM
+customer's actual analytics data, plus a dedicated documentation tab (built
+from Metabase's own text cards, not a separate document) on each dashboard
+explaining it for the people who'll actually use it.
 
-Everything happens by talking to Claude in VS Code. There is nothing to
-`npm install` or `run`.
+Everything happens by talking to Claude in VS Code — describe what you need
+(a stated requirement, a pasted transcript, an attached PDF/image, or several
+combined) and Claude builds it. There is nothing to `npm install` or `run`.
 
 ## Prerequisites
 
@@ -58,26 +63,29 @@ Open this folder in VS Code with Claude Code active, and say any of:
 Claude will then:
 
 1. Verify Metabase CLI configuration.
-2. Ask which kind of work you want: **Requirements Intake** (you state chart
-   requirements directly — a list, a pasted client doc — and Claude grounds
-   each in that account's real data; this project's primary flow),
-   **Transcript to Insights** (turn a pasted client meeting transcript into
-   chart recommendations grounded in that account's real data), **Default
-   Dashboard** (the standardized onboarding dashboard every account gets,
-   built automatically), or **Important Metrics Dashboard** (the
-   standardized hiring-efficiency dashboard every account gets, also built
-   automatically).
+2. Ask which kind of work you want: **Requirements Intake** (you share chart
+   requirements directly, in whatever form you have them — a written ask, a
+   numbered list, a pasted client transcript, an attached document (PDF,
+   image, etc.), or several combined — and Claude grounds each in that
+   account's real data and assembles a dashboard, new or existing, with a
+   documentation tab explaining it; this project's primary flow),
+   **Default Dashboard** (the standardized onboarding dashboard every
+   account gets, built automatically), or **Important Metrics Dashboard**
+   (the standardized hiring-efficiency dashboard every account gets, also
+   built automatically).
 
-The **Requirements Intake** flow asks for the account number and your chart
-requirements directly, checks known patterns/reference material first and
-falls back to live discovery, asks a clarifying question only when a
-requirement is genuinely ambiguous, and presents a numbered list of
-buildable charts before asking which to create.
-
-The **Transcript to Insights** flow asks for the account number and the
-pasted transcript, extracts analytics requirements from it, grounds each in
-the account's real data, and presents a numbered list of buildable charts
-before asking which to create.
+The **Requirements Intake** flow asks for the account number and your
+requirements (any combination of a stated ask, a transcript, or an attached
+document), checks known patterns/reference material first and falls back to
+live discovery, asks a clarifying question only when a requirement is
+genuinely ambiguous, and presents a numbered list of buildable charts before
+asking which to create. Once confirmed, it decides where they land — a
+dashboard you named, an existing dashboard it asks you about if one plausibly
+already covers the same ground, or one or more new dashboards otherwise —
+assembles the charts there with drill-downs, and adds a documentation tab
+(built from Metabase's own text cards) explaining the dashboard for its end
+users. Audio/video sources aren't processed directly — Claude will ask for a
+text transcript instead, since this project has no transcription capability.
 
 The **Default Dashboard** flow instead just asks for the account number and
 runs `scripts/create_default_dashboard.py`, which discovers the account's
@@ -88,14 +96,14 @@ account number and runs `scripts/create_important_metrics_dashboard.py`,
 which discovers the account's data and builds its own standard chart set
 (jobs & hiring efficiency, ratios, trends, candidate diversity) end-to-end.
 
-Every discovery/resolution step in the two conversational flows
-(Requirements Intake, Transcript to Insights) works from schema metadata
-(table/column names, types) only — it never samples, queries, or displays
-the account's actual row data. The one narrow, documented exception is
-described in "Where charts touch real data" below. The two dashboard scripts
-follow the same metadata-only discovery internally.
+Every discovery/resolution step in the Requirements Intake flow works from
+schema metadata (table/column names, types) only — it never samples,
+queries, or displays the account's actual row data. The one narrow,
+documented exception is described in "Where charts touch real data" below.
+The two dashboard scripts follow the same metadata-only discovery
+internally.
 
-See `docs/workflow.md` for all four flows written out in more detail, and
+See `docs/workflow.md` for all three flows written out in more detail, and
 `CLAUDE.md` for the operating instructions Claude itself follows.
 
 ## Project structure
@@ -107,16 +115,17 @@ README.md                  This file
 .gitignore
 config/analysis-config.md  Tunable defaults (data-quality thresholds, chart-type defaults)
 prompts/
-  discovery.md              Map the account's actual data (metadata only, both conversational flows)
-  chart-generation.md        Create + verify charts in Metabase (both conversational flows)
-  transcript-insights.md     Transcript to Insights: transcript -> grounded chart candidates
-  requirements-intake.md     Requirements Intake: stated requirements -> grounded chart candidates
+  discovery.md              Map the account's actual data (metadata only)
+  chart-generation.md        Create + verify one card in Metabase
+  requirements-intake.md     Requirements Intake: stated ask / transcript / document (any
+                              combination) -> grounded chart candidates -> dashboard
+                              (new or existing) with a text-card documentation tab
   infeasible-requirement.md  How to handle a requirement the account's real data can't support
   metabase_skill_improvement.md  Prompt for building references/ (schema map, metric glossary,
                               canonical patterns) that Requirements Intake checks first once built
 docs/
   architecture.md            System shape and rationale
-  workflow.md                Human-readable walkthrough of all four flows
+  workflow.md                Human-readable walkthrough of all three flows
 references/
   schema-map.md              Structural (metadata-only) map of the 12 core Recruit CRM tables
   metric-glossary.md         Business-term definitions confirmed by the user, per account
@@ -182,13 +191,14 @@ Claude will only invoke one if the task genuinely calls for it:
 ## Limitations / what's not built here
 
 - No web pages of this project's own — recommendations and explanations are
-  delivered as terminal/chat output; the only dashboard/card content that
-  exists is what gets created in Metabase itself (Default Dashboard flow,
-  Important Metrics Dashboard flow, or confirmed Requirements Intake /
-  Transcript to Insights charts).
-- Requirements Intake and Transcript to Insights create individual cards
-  only — dashboard assembly for those two flows is future scope, not built
-  yet.
+  delivered as terminal/chat output; the only dashboard/card/document
+  content that exists is what gets created in Metabase itself (Default
+  Dashboard flow, Important Metrics Dashboard flow, or confirmed
+  Requirements Intake charts/dashboards/documents).
+- No audio/video transcription — Requirements Intake accepts a stated ask, a
+  pasted transcript, and attached documents (PDF, image, etc.), but can't
+  process a raw audio/video file directly. Claude will ask for a text
+  transcript of it instead.
 - Chart creation depends on what the installed `mb` CLI version actually
   supports; if a capability isn't available, Claude will say so rather than
   working around it with a different interface.

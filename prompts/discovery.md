@@ -77,6 +77,20 @@ would require querying real data. If a chart's build later needs to know
 whether a dimension is too sparse to trust, that's assessed at
 `prompts/chart-generation.md`'s one validation step, not here.
 
+**If this turns up a genuinely new structural fact `references/schema-map.md`
+doesn't already cover** — a core entity beyond the 12 it documents, or a
+materially different column/FK shape on one of them — don't write it into
+`references/schema-map.md` yourself, and don't treat this step as a trigger
+to update that file. It's deliberately stable and manually curated, not
+auto-populated from live discovery. Flag the discrepancy to the user instead
+(name the account and the specific mismatch) and continue the current
+requirement on what's actually confirmed to exist; a genuine schema change
+gets folded into `schema-map.md` later as its own separate, reviewed edit,
+never as a byproduct of a live discovery pass. A custom (`cf`) field or a
+row count/cardinality never goes into it either way — both are explicitly
+account-specific and excluded by that file's own "How to use this file"
+section.
+
 ## 4. Where value/data questions actually get resolved
 
 A field's *name* and *type* are metadata (covered above). A field's actual
@@ -100,6 +114,14 @@ project does not query for them during discovery. Resolve these instead:
    wrong assumption or a missing category value actually surfaces (see
    `prompts/infeasible-requirement.md`), not a separate live probe during
    discovery.
+
+**The instant step 2 gets an answer, write it to
+`references/metric-glossary.md` under this account's `## Account <n>`
+section — in the same turn, before resolving the next open question or
+moving on to build the chart.** Don't hold it in conversation context to
+write back "later" or "at the end" — that's exactly how a confirmed answer
+gets lost once the session ends, and the next session (or the next
+requirement in this one) re-asks something already settled.
 
 Watch for structural (not data) red flags instead: a status/stage column
 with a generic name suggesting it might be unused, an owner/recruiter field

@@ -6,8 +6,7 @@ using only fields that were actually discovered — never assumed schema.
 ## Sequence (do not skip steps)
 
 1. The candidate chart(s) have already been presented and explained — see
-   `prompts/requirements-intake.md` or `prompts/transcript-insights.md`,
-   whichever flow is active.
+   `prompts/requirements-intake.md`.
 2. **Ask for confirmation** on which recommendation(s) to actually create,
    unless the user already said "create all of them" or similar. In the
    same turn, **also ask whether to add a description to the card(s)**
@@ -98,9 +97,11 @@ using only fields that were actually discovered — never assumed schema.
      account's currency isn't already recorded in
      `references/metric-glossary.md`, ask the user once (e.g. "Which
      currency should chart values use for this account — USD, EUR, GBP,
-     INR, or another?") before creating the card, then record the answer
-     there so later charts in this session and future sessions don't
-     re-ask.
+     INR, or another?") before creating the card, then **write the answer
+     to that account's `## Account <n>` section immediately — in the same
+     turn as the answer, before creating the card** — so later charts in
+     this session and future sessions don't re-ask. Don't defer this to a
+     later cleanup step; it's the whole reason "ask once per account" works.
    - **Show the value on every point/bar/segment by default** — see
      CLAUDE.md "Data labels": `"graph.show_values": true` for bar/line/
      area/row/combo/funnel, `"pie.percent_visibility": "inside"` or
@@ -112,8 +113,11 @@ using only fields that were actually discovered — never assumed schema.
      Metabase's default** — see CLAUDE.md "Combo chart series display" for
      why leaving any series unset is never safe here.
 5. Resolve the destination collection — see CLAUDE.md "Where created charts
-   live": the account's sub-collection under collection 199 ("Data Team
-   WIP"), creating it if it doesn't exist yet.
+   live": whichever convention Requirements Intake's step 2 settled on for
+   this request — the account's sub-collection under collection 199 ("Data
+   Team WIP"), or the "<Dashboard Name> Cards" sub-collection under the
+   account's own collection's **Cards** folder — creating whichever
+   collections in the chain don't exist yet.
 6. Create the card:
 
 ```bash
@@ -122,10 +126,11 @@ mb card create --file ./.scratch/<name>.json --profile <profile> --json
 
 Include a meaningful `name`, the validated `dataset_query`, chosen `display`,
 minimal sensible `visualization_settings`, and `collection_id` set to the
-resolved account collection. Add filters from the recommendation's
-"Recommended Filters" as query filters or dashboard-ready parameters where
-appropriate. Only include a `description` if the user opted in at step 2 —
-when they didn't, omit the field entirely rather than adding one anyway.
+resolved destination collection from step 5. Add filters from the
+recommendation's "Recommended Filters" as query filters or dashboard-ready
+parameters where appropriate. Only include a `description` if the user
+opted in at step 2 — when they didn't, omit the field entirely rather than
+adding one anyway.
 
 7. **Verify** the created card:
 

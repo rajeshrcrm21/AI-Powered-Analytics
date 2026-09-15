@@ -5,14 +5,17 @@ known quirks. **No customer data (row values, names, numbers) is stored
 here** — only metadata pulled via `mb table fields` / `mb table get`, which
 is metadata about the schema, not the records themselves.
 
-Harvested from account **662** (`Data Team WIP` collection 24521) on
-2026-09-06, chosen because it already has all 12 core tables and confirmed
-prior chart-building activity (see `logs/history.jsonl`). The 12-table shape
-below is expected to hold for **every** account — verify with `mb search
-<name>_<account> --models table --db-id 13371569` before assuming a table
-exists for a new one; a couple of tables (Pitched Candidates, Teams) may not
-apply to every account depending on which Recruit CRM modules the client
-uses.
+**Source:** account 662, verified 2026-09-06 (chosen as the sample because
+it has all 12 core tables represented — see `logs/history.jsonl`). Account
+662 is a low-activity account whose row content and custom fields are not
+representative of a real client's data (see "Custom fields — always
+account-specific" below); only the *structural* shape documented here —
+table/column names, types, keys, and relationships — is expected to
+generalize across accounts. The 12-table shape below is expected to hold for
+**every** account — verify with `mb search <name>_<account> --models table
+--db-id 13371569` before assuming a table exists for a new one; a couple of
+tables (Pitched Candidates, Teams) may not apply to every account depending
+on which Recruit CRM modules the client uses.
 
 Every table is named `<EntityName>_<account_number>` physically (e.g.
 `companies_662`), even though `mb search`/`table get` surface a generic
@@ -36,6 +39,16 @@ the legacy Redshift `13371338`) before trusting a match, per CLAUDE.md.
    harvest intentionally avoids. Pull them per-account, per-table, only when
    a specific chart's build actually needs to know (e.g. "is this dimension
    too sparse to chart").
+5. **This file is deliberately stable and manually curated — never
+   auto-updated mid-session.** If live discovery on some account turns up
+   something that looks like a genuinely new structural fact this file
+   doesn't cover (a core entity beyond the 12 below, or a materially
+   different column/FK shape on one of them), don't write it in as part of
+   that discovery pass — flag the discrepancy to the user per
+   `prompts/discovery.md` section 3 instead. A confirmed schema change
+   reaches this file only as its own separate, deliberate edit. Custom
+   (`cf`) fields and row counts stay excluded entirely either way, per
+   points 2 and 4 above.
 
 ## Duplicate-id tables (repeat from CLAUDE.md, confirmed again at the column level)
 
@@ -90,10 +103,9 @@ No outbound FK columns — referenced by Contacts/Jobs/Deals/etc. via their own 
 | join_for_companies_table | Integer | **FK → companies.id** | |
 | created_on / updated_on | DateTime | Creation/UpdatedTimestamp | |
 
-**Custom fields:** ~75 `(cf)`-suffixed columns on this account — mostly
-one-off test fields (`testtext`, `qwerty`, `dropdown1`, etc.). Treat the
-entire `(cf)` set as **account-specific**; never assume a `(cf)` name from
-one account exists on another.
+**Custom fields:** present on this table — count and names are
+account-specific; never assume a `(cf)` name from one account exists on
+another (see "Custom fields — always account-specific" below).
 
 ---
 
@@ -120,8 +132,9 @@ one account exists on another.
 | join_for_companies_table | Integer | **FK → companies.id** | |
 | join_for_contacts_table | Integer | **FK → contacts.id** | |
 
-**Custom fields:** ~45 `(cf)` columns on this account, similarly test-heavy
-(`n5`, `dasda`, `metabase_test`, etc.) — account-specific, discover fresh.
+**Custom fields:** present on this table — count and names are
+account-specific; discover fresh per account (see "Custom fields — always
+account-specific" below).
 
 ---
 
@@ -154,10 +167,10 @@ one account exists on another.
 | join_for_contacts_table | Integer | **FK → contacts.id** | |
 | join_for_companies_table | Integer | **FK → companies.id** | (linked contact's company) |
 
-**Custom fields:** ~100 `(cf)` columns on this account — by far the most
-custom-field bloat of any table here, almost entirely one-off/test fields.
-**Always treat Candidates' custom fields as fully account-specific** —
-discover live per account, never assume from this reference.
+**Custom fields:** present on this table, in significant volume on the
+sampled account. **Always treat Candidates' custom fields as fully
+account-specific** — discover live per account, never assume from this
+reference (see "Custom fields — always account-specific" below).
 
 ---
 
@@ -189,9 +202,9 @@ time the pair moves to a new stage).
 | join_for_companies_table | Integer | **FK → companies.id** | |
 | join_for_contacts_table | Integer | **FK → contacts.id** | |
 
-**Custom fields:** 4 `(cf)` columns on this account (`field_on_04`, `abc`,
-`job_specific_note`, `number_custom_field`) — light custom-field usage here
-relative to Candidates/Jobs/Contacts.
+**Custom fields:** present on this table, lighter volume than
+Candidates/Jobs/Contacts on the sampled account — count and names are still
+account-specific (see "Custom fields — always account-specific" below).
 
 ---
 
@@ -219,9 +232,8 @@ per row — duplicate ids expected whenever a deal has >1 collaborator.
 | join_for_companies_table | Integer | **FK → companies.id** | |
 | join_for_jobs_table | Integer | **FK → jobs.id** | |
 
-**Custom fields:** ~55 `(cf)` columns on this account, heavily test-junk
-(long garbage-string field names present — a sign this account's Deals
-custom fields are not representative of a real client's naming).
+**Custom fields:** present on this table — count and names are
+account-specific (see "Custom fields — always account-specific" below).
 
 ---
 
@@ -352,14 +364,15 @@ if a chart needs to join back to Teams.
 
 ## Custom fields — always account-specific
 
-Every table above except Companies, Call Logs, Meetings, Notes, Tasks,
-Pitched Candidates, and Teams carries a long tail of `(cf)`-suffixed custom
-fields on this account (Contacts ~75, Jobs ~45, Candidates ~100, Deals ~55,
-Assign Job Candidate 4). On account 662 these are overwhelmingly test/junk
-fields (`qwerty`, `testtext`, `dasdadad`, garbage-string names) — **this
-account is not a representative sample of what a real client's custom
-fields look like,** only proof that the volume and shape vary wildly and
-must never be assumed from one account to the next.
+On the sampled account (662), Contacts, Jobs, Candidates, Assign Job
+Candidate, and Deals each carry a long tail of `(cf)`-suffixed custom
+fields, ranging from a handful of columns to well over fifty depending on
+the table; Companies, Call Logs, Meetings, Notes, Tasks, Pitched
+Candidates, and Teams carry none. Account 662's own custom fields are
+placeholder/test entries, not representative of what a real client
+configures — treat this only as evidence that volume and naming vary
+unpredictably per table and per account, never as a count or set of names
+to assume elsewhere.
 
 **Rule: never carry a `(cf)` field name forward from this file or from one
 account to another.** Every requirement that needs a custom field must

@@ -1,8 +1,8 @@
 # Analysis configuration
 
-Defaults and knobs shared by this project's chart-building flows
-(Requirements Intake, Transcript to Insights). Adjust here rather than in
-CLAUDE.md if these need to change per-deployment.
+Defaults and knobs shared by this project's chart-building flow
+(Requirements Intake). Adjust here rather than in CLAUDE.md if these need to
+change per-deployment.
 
 ## Data quality defaults (CLAUDE.md "Data quality gate")
 
